@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Firebase Test</title></head>
+<body style="background:#111;color:#fff;font-family:monospace;padding:40px;">
+<h2>Firebase Connection Test</h2>
+<div id="log" style="margin-top:20px;line-height:2;"></div>
+
+<script>
+function log(msg, color) {
+  const d = document.getElementById('log');
+  d.innerHTML += `<div style="color:${color||'#fff'}">${msg}</div>`;
+}
+log('Page loaded ✓', '#6f6');
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"
+  onload="log('firebase-app-compat loaded ✓','#6f6')"
+  onerror="log('firebase-app-compat FAILED ✗','#f66')">
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"
+  onload="log('firebase-database-compat loaded ✓','#6f6')"
+  onerror="log('firebase-database-compat FAILED ✗','#f66')">
+</script>
+
+<script>
+log('Checking firebase global...');
+if (typeof firebase === 'undefined') {
+  log('firebase global NOT found ✗ — CDN scripts blocked', '#f66');
+} else {
+  log('firebase global found ✓', '#6f6');
+  try {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDbEcQKWYchOEcmFUL9yeRkB0MhEz3o2y4",
+      authDomain: "magellan-case.firebaseapp.com",
+      databaseURL: "https://magellan-case-default-rtdb.firebaseio.com",
+      projectId: "magellan-case",
+      storageBucket: "magellan-case.firebasestorage.app",
+      messagingSenderId: "862253393532",
+      appId: "1:862253393532:web:1347aff9c7ff164f19cbf9"
+    });
+    log('initializeApp ✓', '#6f6');
+    const db = firebase.database();
+    log('database() ✓', '#6f6');
+    db.ref('.info/connected').on('value', snap => {
+      log('Connected to Firebase: ' + snap.val(), snap.val() ? '#6f6' : '#fa0');
+    });
+  } catch(e) {
+    log('Error: ' + e.message, '#f66');
+  }
+}
+</script>
+</body>
+</html>
