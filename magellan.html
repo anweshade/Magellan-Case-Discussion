@@ -5,79 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Magellan Boatworks — Group Activity</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
   :root {
-    --navy:#0a1628; --teal:#0d7a8c; --teal-light:#12a5bc;
-    --gold:#c8953a; --gold-light:#e8b050; --coral:#d94f3d;
-    --cream:#f4ede0; --muted:#6b7280; --green:#2d7a4f;
-    --green-light:#3a9e66; --white:#ffffff;
+    --bg:#f5f3ef; --bg2:#edeae4; --bg3:#e4e0d8;
+    --teal:#0d7a8c; --teal-light:#12a5bc; --teal-bg:#e6f4f7;
+    --gold:#a06e1a; --gold-light:#c8953a; --gold-bg:#fdf3e3;
+    --coral:#c0392b; --coral-bg:#fdf0ee;
+    --navy:#1a2940; --text:#2c3340; --muted:#6b7280;
+    --green:#1f6b3e; --green-bg:#e8f5ee; --green-light:#2d9e5c;
+    --white:#ffffff; --border:#d4cfc7; --shadow:rgba(0,0,0,.08);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--navy);font-family:'DM Sans',sans-serif;color:var(--cream);min-height:100vh;overflow-x:hidden;}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(13,122,140,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(200,149,58,.08) 0%,transparent 50%);pointer-events:none;z-index:0;}
-  .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 80px;}
+  body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px 80px;}
 
-  /* ── SETUP SCREEN ── */
-  #setup{position:fixed;inset:0;background:var(--navy);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+  /* ── SETUP ── */
+  #setup{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
   #setup.gone{display:none;}
-  .setup-card{background:rgba(255,255,255,.05);border:1px solid rgba(200,149,58,.3);border-radius:16px;padding:40px 44px;max-width:500px;width:92%;text-align:center;}
-  .s-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--white);margin-bottom:4px;}
-  .s-title span{color:var(--gold);}
-  .s-sub{font-size:13px;color:rgba(244,237,224,.45);margin-bottom:24px;}
+  .setup-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:40px 44px;max-width:500px;width:92%;text-align:center;box-shadow:0 4px 24px var(--shadow);}
+  .s-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--navy);margin-bottom:4px;}
+  .s-title span{color:var(--gold-light);}
+  .s-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
   .s-lbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:10px;}
   .gpick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;}
-  .gpick{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.1);color:var(--cream);font-family:'Playfair Display',serif;font-size:17px;font-weight:700;padding:13px 6px;border-radius:9px;cursor:pointer;transition:all .2s;}
-  .gpick:hover{border-color:var(--teal);}
-  .gpick.sel{border-color:var(--gold);background:rgba(200,149,58,.14);color:var(--gold);}
-  .instructor-btn{background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.2);color:rgba(244,237,224,.5);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;padding:10px 20px;border-radius:8px;cursor:pointer;transition:all .2s;margin-top:4px;}
-  .instructor-btn:hover{border-color:var(--gold);color:var(--gold);}
-  .s-go{width:100%;background:var(--gold);border:none;color:var(--navy);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;padding:14px;border-radius:9px;cursor:pointer;transition:background .2s;opacity:.35;pointer-events:none;margin-top:8px;}
+  .gpick{background:var(--bg2);border:2px solid var(--border);color:var(--text);font-family:'Playfair Display',serif;font-size:17px;font-weight:700;padding:13px 6px;border-radius:9px;cursor:pointer;transition:all .2s;}
+  .gpick:hover{border-color:var(--teal);background:var(--teal-bg);}
+  .gpick.sel{border-color:var(--gold-light);background:var(--gold-bg);color:var(--gold);}
+  .instructor-btn{background:transparent;border:1px dashed var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;padding:10px 20px;border-radius:8px;cursor:pointer;transition:all .2s;margin-top:4px;}
+  .instructor-btn:hover{border-color:var(--gold-light);color:var(--gold);}
+  .s-go{width:100%;background:var(--teal);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;padding:14px;border-radius:9px;cursor:pointer;transition:background .2s;opacity:.35;pointer-events:none;margin-top:8px;}
   .s-go.ready{opacity:1;pointer-events:auto;}
-  .s-go.ready:hover{background:var(--gold-light);}
+  .s-go.ready:hover{background:var(--teal-light);}
   .conn-status{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;padding:6px 14px;border-radius:20px;margin-top:8px;}
-  .conn-status.ok{background:rgba(45,122,79,.2);color:var(--green-light);border:1px solid rgba(45,122,79,.4);}
-  .conn-status.err{background:rgba(217,79,61,.15);color:#f0806e;border:1px solid rgba(217,79,61,.3);}
-  .conn-status.wait{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.1);}
+  .conn-status.ok{background:var(--green-bg);color:var(--green);border:1px solid rgba(31,107,62,.3);}
+  .conn-status.err{background:var(--coral-bg);color:var(--coral);border:1px solid rgba(192,57,43,.3);}
+  .conn-status.wait{background:var(--bg2);color:var(--muted);border:1px solid var(--border);}
+
+  /* password modal */
+  #pwModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;align-items:center;justify-content:center;}
+  #pwModal.show{display:flex;}
+  .pw-card{background:var(--white);border-radius:14px;padding:32px 36px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+  .pw-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+  .pw-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+  .pw-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'DM Mono',monospace;font-size:16px;letter-spacing:.2em;text-align:center;color:var(--text);background:var(--bg2);margin-bottom:12px;outline:none;}
+  .pw-input:focus{border-color:var(--teal);}
+  .pw-btn{width:100%;background:var(--teal);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:12px;border-radius:8px;cursor:pointer;}
+  .pw-btn:hover{background:var(--teal-light);}
+  .pw-err{color:var(--coral);font-size:12px;margin-top:8px;display:none;}
 
   /* ── HEADER ── */
-  header{padding:28px 0 20px;border-bottom:1px solid rgba(200,149,58,.3);margin-bottom:22px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+  header{padding:28px 0 20px;border-bottom:2px solid var(--border);margin-bottom:22px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;}
   .brand-eye{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:5px;}
-  .brand-title{font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,36px);font-weight:900;color:var(--white);}
-  .brand-title span{color:var(--gold);}
-  .brand-sub{font-size:12px;color:rgba(244,237,224,.4);margin-top:4px;font-weight:300;}
+  .brand-title{font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,36px);font-weight:900;color:var(--navy);}
+  .brand-title span{color:var(--gold-light);}
+  .brand-sub{font-size:12px;color:var(--muted);margin-top:4px;font-weight:300;}
   .hdr-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .gbadge{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--white);background:var(--teal);padding:5px 14px;border-radius:6px;}
-  .gbadge.instructor{background:var(--gold);color:var(--navy);}
-  .live-dot{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--green-light);}
-  .live-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green-light);animation:blink 2s infinite;}
+  .gbadge{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#fff;background:var(--teal);padding:5px 14px;border-radius:6px;}
+  .gbadge.instructor{background:var(--gold-light);color:#fff;}
+  .live-dot{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--green);}
+  .live-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
   /* ── TIMER ── */
   .timer-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
   .t-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;}
-  .t-disp{font-family:'DM Mono',monospace;font-size:34px;font-weight:500;color:var(--white);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:8px 16px;border-radius:7px;min-width:118px;text-align:center;transition:color .3s;}
-  .t-disp.warn{color:var(--gold);}
+  .t-disp{font-family:'DM Mono',monospace;font-size:34px;font-weight:500;color:var(--navy);background:var(--white);border:1px solid var(--border);padding:8px 16px;border-radius:7px;min-width:118px;text-align:center;transition:color .3s;box-shadow:0 2px 8px var(--shadow);}
+  .t-disp.warn{color:var(--gold-light);}
   .t-disp.hot{color:var(--coral);animation:pulse .8s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   .t-btns{display:flex;gap:6px;}
-  .tbtn{font-family:'DM Mono',monospace;font-size:11px;padding:5px 11px;border-radius:4px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:var(--cream);cursor:pointer;transition:all .18s;}
-  .tbtn:hover{border-color:var(--gold);color:var(--gold);}
+  .tbtn{font-family:'DM Mono',monospace;font-size:11px;padding:5px 11px;border-radius:4px;border:1px solid var(--border);background:var(--white);color:var(--text);cursor:pointer;transition:all .18s;}
+  .tbtn:hover{border-color:var(--teal);color:var(--teal);}
   .tbtn.on{background:var(--coral);border-color:var(--coral);color:#fff;}
 
   /* ── PROGRESS ── */
   .prog-wrap{margin-bottom:20px;}
   .prog-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;font-family:'DM Mono',monospace;}
-  .prog-bar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;}
-  .prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:2px;transition:width .6s ease;}
+  .prog-bar{height:3px;background:var(--bg3);border-radius:2px;}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold-light));border-radius:2px;transition:width .6s ease;}
 
   /* ── PHASE NAV ── */
-  .phase-nav{display:flex;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:4px;margin-bottom:24px;overflow-x:auto;gap:0;}
-  .pnav{flex:1;min-width:84px;padding:9px 6px;border:none;background:transparent;color:rgba(244,237,224,.4);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:7px;transition:all .22s;text-align:center;white-space:nowrap;}
+  .phase-nav{display:flex;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px;overflow-x:auto;gap:0;box-shadow:0 2px 8px var(--shadow);}
+  .pnav{flex:1;min-width:84px;padding:9px 6px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:7px;transition:all .22s;text-align:center;white-space:nowrap;}
   .pnav .pnum{display:block;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:3px;letter-spacing:.09em;}
-  .pnav:hover{color:var(--cream);background:rgba(255,255,255,.06);}
-  .pnav.active{background:var(--teal);color:#fff;box-shadow:0 2px 10px rgba(13,122,140,.4);}
-  .pnav.active .pnum{color:rgba(255,255,255,.6);}
-  .pnav.done .pnum::after{content:' ✓';color:var(--green-light);}
+  .pnav:hover{color:var(--text);background:var(--bg2);}
+  .pnav.active{background:var(--teal);color:#fff;}
+  .pnav.active .pnum{color:rgba(255,255,255,.7);}
+  .pnav.done .pnum::after{content:' ✓';color:var(--green);}
 
   /* ── PANELS ── */
   .panel{display:none;animation:up .3s ease;}
@@ -86,155 +102,163 @@
 
   /* ── META ── */
   .meta{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
-  .meta-i{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(244,237,224,.45);}
+  .meta-i{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;}
-  .dot.g{background:var(--gold);}
+  .dot.g{background:var(--gold-light);}
   .dot.r{background:var(--coral);}
 
   /* ── SCENARIO ── */
-  .sc{background:rgba(255,255,255,.04);border:1px solid rgba(200,149,58,.25);border-radius:13px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;}
-  .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--teal-light));}
+  .sc{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 2px 12px var(--shadow);}
+  .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-light),var(--teal));}
   .sc-eye{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
-  .sc-head{font-family:'Playfair Display',serif;font-size:clamp(16px,2.3vw,22px);font-weight:700;color:var(--white);line-height:1.3;margin-bottom:11px;}
-  .sc-body{font-size:13.5px;line-height:1.75;color:rgba(244,237,224,.78);font-weight:300;}
-  .sc-body strong{color:var(--gold-light);font-weight:600;}
-  .twist{display:inline-flex;align-items:center;gap:7px;background:rgba(217,79,61,.15);border:1px solid rgba(217,79,61,.4);color:#f0806e;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:20px;margin-bottom:12px;}
+  .sc-head{font-family:'Playfair Display',serif;font-size:clamp(16px,2.3vw,22px);font-weight:700;color:var(--navy);line-height:1.3;margin-bottom:11px;}
+  .sc-body{font-size:13.5px;line-height:1.75;color:var(--text);font-weight:300;}
+  .sc-body strong{color:var(--gold);font-weight:600;}
+  .twist{display:inline-flex;align-items:center;gap:7px;background:var(--coral-bg);border:1px solid rgba(192,57,43,.3);color:var(--coral);font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:20px;margin-bottom:12px;}
   .twist::before{content:'⚡';}
 
   /* ── PILLS ── */
   .pills{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0;}
-  .pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 13px;font-family:'DM Mono',monospace;font-size:12px;}
+  .pill{background:var(--white);border:1px solid var(--border);border-radius:7px;padding:9px 13px;font-family:'DM Mono',monospace;font-size:12px;box-shadow:0 1px 4px var(--shadow);}
   .pill .lbl{color:var(--muted);font-size:10px;letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:3px;}
-  .pill .val{color:var(--white);font-size:14px;font-weight:500;}
+  .pill .val{color:var(--navy);font-size:14px;font-weight:500;}
   .pill.r .val{color:var(--coral);}
   .pill.y .val{color:var(--gold-light);}
-  .pill.b .val{color:var(--teal-light);}
+  .pill.b .val{color:var(--teal);}
 
   /* ── TASKS ── */
   .tasks{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:11px;margin-bottom:20px;}
-  .task{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:17px;}
+  .task{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:17px;box-shadow:0 1px 6px var(--shadow);}
   .task-hd{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
   .tnum{width:27px;height:27px;border-radius:50%;background:var(--teal);color:#fff;font-family:'DM Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .ttitle{font-size:13px;font-weight:600;color:var(--white);line-height:1.3;}
-  .tbody{font-size:12.5px;line-height:1.6;color:rgba(244,237,224,.58);font-weight:300;}
-  .tbody em{color:var(--gold-light);font-style:normal;font-weight:500;}
+  .ttitle{font-size:13px;font-weight:600;color:var(--navy);line-height:1.3;}
+  .tbody{font-size:12.5px;line-height:1.6;color:var(--muted);}
+  .tbody em{color:var(--gold);font-style:normal;font-weight:500;}
 
   /* ── DEBATE ── */
   .debate{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0;}
   @media(max-width:560px){.debate{grid-template-columns:1fr;}}
   .dside{border-radius:11px;padding:17px;border:1px solid;}
-  .dside.l{background:rgba(13,122,140,.09);border-color:rgba(13,122,140,.33);}
-  .dside.r{background:rgba(217,79,61,.07);border-color:rgba(217,79,61,.28);}
+  .dside.l{background:var(--teal-bg);border-color:rgba(13,122,140,.25);}
+  .dside.r{background:var(--coral-bg);border-color:rgba(192,57,43,.2);}
   .d-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;}
-  .dside.l .d-lbl{color:var(--teal-light);}
-  .dside.r .d-lbl{color:#f0806e;}
-  .d-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--white);margin-bottom:9px;line-height:1.3;}
+  .dside.l .d-lbl{color:var(--teal);}
+  .dside.r .d-lbl{color:var(--coral);}
+  .d-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:9px;line-height:1.3;}
   .d-pts{list-style:none;display:flex;flex-direction:column;gap:7px;}
-  .d-pts li{font-size:12.5px;color:rgba(244,237,224,.7);line-height:1.5;padding-left:16px;position:relative;font-weight:300;}
-  .dside.l .d-pts li::before{content:'→';position:absolute;left:0;color:var(--teal-light);font-weight:600;}
-  .dside.r .d-pts li::before{content:'→';position:absolute;left:0;color:#f0806e;font-weight:600;}
+  .d-pts li{font-size:12.5px;color:var(--text);line-height:1.5;padding-left:16px;position:relative;font-weight:300;}
+  .dside.l .d-pts li::before{content:'→';position:absolute;left:0;color:var(--teal);font-weight:600;}
+  .dside.r .d-pts li::before{content:'→';position:absolute;left:0;color:var(--coral);font-weight:600;}
 
   /* ── ANSWER BOX ── */
   .ans-block{margin-top:16px;}
   .ans-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;}
-  .sync-badge{font-size:10px;color:var(--green-light);letter-spacing:0;}
-  .ans-ta{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 14px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;resize:vertical;min-height:74px;transition:border-color .2s;}
-  .ans-ta:focus{outline:none;border-color:var(--teal);background:rgba(13,122,140,.07);}
-  .ans-ta::placeholder{color:rgba(244,237,224,.2);font-style:italic;}
-  .ans-ta:disabled{opacity:.5;cursor:not-allowed;}
+  .sync-badge{font-size:10px;color:var(--green);letter-spacing:0;}
+  .ans-ta{width:100%;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;resize:vertical;min-height:74px;transition:border-color .2s;box-shadow:inset 0 1px 4px var(--shadow);}
+  .ans-ta:focus{outline:none;border-color:var(--teal);}
+  .ans-ta::placeholder{color:var(--muted);font-style:italic;}
 
   /* ── BUDGET TABLE ── */
   .tbl-wrap{overflow-x:auto;margin:14px 0;}
   .btbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:500px;}
-  .btbl th{background:rgba(13,122,140,.28);color:var(--white);font-weight:600;padding:10px 12px;text-align:left;font-size:11px;letter-spacing:.05em;border-bottom:1px solid rgba(13,122,140,.4);}
-  .btbl td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);color:rgba(244,237,224,.8);vertical-align:middle;}
+  .btbl th{background:var(--teal);color:#fff;font-weight:600;padding:10px 12px;text-align:left;font-size:11px;letter-spacing:.05em;}
+  .btbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;background:var(--white);}
   .btbl tr:last-child td{border-bottom:none;}
-  .dsel{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--white);font-family:'DM Mono',monospace;font-size:12px;padding:5px 9px;border-radius:5px;cursor:pointer;}
+  .btbl tr:hover td{background:var(--bg2);}
+  .dsel{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:5px 9px;border-radius:5px;cursor:pointer;}
   .dsel:disabled{opacity:.5;cursor:not-allowed;}
-  .dsel option{background:#0f2040;}
-  .rta{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:7px 9px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:12px;resize:none;min-height:46px;}
+  .rta{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:7px 9px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;resize:none;min-height:46px;}
   .rta:focus{outline:none;border-color:var(--teal);}
-  .rta::placeholder{color:rgba(244,237,224,.2);font-style:italic;}
+  .rta::placeholder{color:var(--muted);font-style:italic;}
   .rta:disabled{opacity:.5;cursor:not-allowed;}
 
   /* ── DELIVERABLE ── */
-  .deliv{background:linear-gradient(135deg,rgba(200,149,58,.12),rgba(200,149,58,.05));border:1px solid rgba(200,149,58,.33);border-radius:11px;padding:19px;margin-top:14px;}
+  .deliv{background:var(--gold-bg);border:1px solid rgba(160,110,26,.25);border-radius:11px;padding:19px;margin-top:14px;}
   .deliv-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
-  .deliv p{font-size:13px;color:rgba(244,237,224,.8);line-height:1.65;font-weight:300;}
-  .deliv strong{color:var(--gold-light);font-weight:600;}
+  .deliv p{font-size:13px;color:var(--text);line-height:1.65;font-weight:300;}
+  .deliv strong{color:var(--gold);font-weight:600;}
 
   /* ── SCORING ── */
-  .scoring{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:20px;margin-top:28px;}
-  .sc2-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:3px;}
-  .sc2-sub{font-size:12px;color:rgba(244,237,224,.4);font-weight:300;margin-bottom:16px;}
+  .scoring{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:20px;margin-top:28px;box-shadow:0 2px 12px var(--shadow);}
+  .sc2-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+  .sc2-sub{font-size:12px;color:var(--muted);font-weight:300;margin-bottom:16px;}
   .sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin-bottom:16px;}
-  .sc-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:12px;transition:border-color .2s;}
-  .sc-card.me{border-color:rgba(200,149,58,.4);}
+  .sc-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px;}
+  .sc-card.me{border-color:var(--gold-light);background:var(--gold-bg);}
   .sc-gname{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;}
   .sc-gname.me{color:var(--gold);}
   .stars{display:flex;gap:3px;margin-bottom:4px;}
-  .star{font-size:18px;cursor:pointer;color:rgba(255,255,255,.12);transition:color .13s;line-height:1;user-select:none;}
-  .star.on{color:var(--gold);}
+  .star{font-size:18px;cursor:pointer;color:var(--border);transition:color .13s;line-height:1;user-select:none;}
+  .star.on{color:var(--gold-light);}
   .star:hover{color:var(--gold-light);}
   .star.disabled{cursor:not-allowed;pointer-events:none;}
-  .sc-tally{font-family:'DM Mono',monospace;font-size:12px;color:var(--cream);margin-top:3px;}
-  .cite-row{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:rgba(244,237,224,.5);cursor:pointer;}
+  .sc-tally{font-family:'DM Mono',monospace;font-size:12px;color:var(--navy);margin-top:3px;}
+  .cite-row{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--muted);cursor:pointer;}
   .cite-row input{accent-color:var(--teal);width:13px;height:13px;cursor:pointer;}
-  .cite-row input:disabled{cursor:not-allowed;}
 
-  /* ── ANSWERS VIEWER (instructor) ── */
-  .answers-viewer{margin-top:16px;border-top:1px solid rgba(255,255,255,.07);padding-top:14px;}
+  /* ── ANSWERS VIEWER ── */
+  .answers-viewer{margin-top:16px;border-top:1px solid var(--border);padding-top:14px;}
   .av-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-  .av-group{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:12px;margin-bottom:8px;}
+  .av-group{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
   .av-gname{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:6px;}
-  .av-ans{font-size:12.5px;color:rgba(244,237,224,.7);line-height:1.6;font-weight:300;white-space:pre-wrap;}
-  .av-empty{font-size:12px;color:rgba(244,237,224,.25);font-style:italic;}
+  .av-ans{font-size:12.5px;color:var(--text);line-height:1.6;white-space:pre-wrap;}
+  .av-empty{font-size:12px;color:var(--muted);font-style:italic;}
 
   /* ── LEADERBOARD ── */
-  .lb{margin-top:14px;border-top:1px solid rgba(255,255,255,.07);padding-top:13px;}
+  .lb{margin-top:14px;border-top:1px solid var(--border);padding-top:13px;}
   .lb-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
-  .lb-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-  .lb-rank{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--gold);width:24px;flex-shrink:0;text-align:center;}
-  .lb-name{font-size:13px;font-weight:600;color:var(--white);flex:1;}
-  .lb-pts{font-family:'DM Mono',monospace;font-size:12px;color:var(--teal-light);}
-  .lb-bw{width:100px;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;}
-  .lb-bf{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:3px;transition:width .5s ease;}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg3);}
+  .lb-rank{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--gold-light);width:24px;flex-shrink:0;text-align:center;}
+  .lb-name{font-size:13px;font-weight:600;color:var(--navy);flex:1;}
+  .lb-pts{font-family:'DM Mono',monospace;font-size:12px;color:var(--teal);}
+  .lb-bw{width:100px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+  .lb-bf{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold-light));border-radius:3px;transition:width .5s ease;}
 
   /* ── VOTE ── */
   .vote-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:10px;margin:14px 0;}
-  .vopt{border:2px solid rgba(255,255,255,.1);border-radius:10px;padding:15px;cursor:pointer;transition:all .22s;text-align:center;background:rgba(255,255,255,.03);}
-  .vopt:hover:not(.locked){border-color:var(--teal);background:rgba(13,122,140,.09);transform:translateY(-2px);}
-  .vopt.sel{border-color:var(--gold);background:rgba(200,149,58,.1);}
-  .vopt.locked{cursor:not-allowed;}
-  .v-letter{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;color:var(--gold);display:block;margin-bottom:6px;}
-  .v-text{font-size:12.5px;color:rgba(244,237,224,.72);line-height:1.4;}
+  .vopt{border:2px solid var(--border);border-radius:10px;padding:15px;cursor:pointer;transition:all .22s;text-align:center;background:var(--white);box-shadow:0 1px 6px var(--shadow);}
+  .vopt:hover{border-color:var(--teal);background:var(--teal-bg);transform:translateY(-2px);}
+  .vopt.sel{border-color:var(--gold-light);background:var(--gold-bg);}
+  .v-letter{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;color:var(--gold-light);display:block;margin-bottom:6px;}
+  .v-text{font-size:12.5px;color:var(--text);line-height:1.4;}
   .res-section{display:none;margin-top:14px;}
   .res-section.on{display:block;}
   .res-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-  .res-ltr{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);width:15px;flex-shrink:0;}
-  .res-bw{flex:1;height:24px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;}
-  .res-bf{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:4px;transition:width .8s ease;display:flex;align-items:center;padding-left:8px;font-size:12px;font-family:'DM Mono',monospace;color:#fff;white-space:nowrap;min-width:32px;}
+  .res-ltr{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-light);width:15px;flex-shrink:0;}
+  .res-bw{flex:1;height:28px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+  .res-bf{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:4px;transition:width .8s ease;display:flex;align-items:center;padding-left:8px;font-size:12px;font-family:'DM Mono',monospace;color:#fff;white-space:nowrap;min-width:36px;}
   .res-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);width:40px;text-align:right;flex-shrink:0;}
   .show-res-btn{display:block;margin:12px auto 0;background:var(--teal);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 26px;border-radius:8px;cursor:pointer;}
   .show-res-btn:hover{background:var(--teal-light);}
 
   /* ── FOOTER ── */
-  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07);}
-  .nbtn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:10px 17px;border-radius:8px;cursor:pointer;transition:all .18s;}
-  .nbtn:hover:not(:disabled){background:rgba(255,255,255,.1);border-color:var(--gold);color:var(--gold);}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:18px;border-top:1px solid var(--border);}
+  .nbtn{display:flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:10px 17px;border-radius:8px;cursor:pointer;transition:all .18s;box-shadow:0 1px 4px var(--shadow);}
+  .nbtn:hover:not(:disabled){border-color:var(--teal);color:var(--teal);}
   .nbtn:disabled{opacity:.3;cursor:not-allowed;}
-  .nbtn.primary{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700;}
-  .nbtn.primary:hover:not(:disabled){background:var(--gold-light);}
+  .nbtn.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700;}
+  .nbtn.primary:hover:not(:disabled){background:var(--teal-light);border-color:var(--teal-light);}
 
   /* ── TOAST ── */
-  .toast{position:fixed;bottom:24px;right:24px;background:rgba(13,122,140,.95);border:1px solid var(--teal-light);color:#fff;font-family:'DM Mono',monospace;font-size:12px;padding:10px 18px;border-radius:8px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;font-family:'DM Mono',monospace;font-size:12px;padding:10px 18px;border-radius:8px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
   .toast.show{opacity:1;transform:translateY(0);}
 
-  /* ── INSTRUCTOR PANEL ── */
-  .instr-banner{background:rgba(200,149,58,.12);border:1px solid rgba(200,149,58,.3);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:var(--gold-light);font-family:'DM Mono',monospace;letter-spacing:.05em;}
+  /* ── INSTRUCTOR BANNER ── */
+  .instr-banner{background:var(--gold-bg);border:1px solid rgba(160,110,26,.3);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 </style>
 </head>
 <body>
+
+<!-- PASSWORD MODAL -->
+<div id="pwModal">
+  <div class="pw-card">
+    <div class="pw-title">Instructor Access</div>
+    <div class="pw-sub">Enter the instructor password to continue</div>
+    <input class="pw-input" type="password" id="pwInput" placeholder="••••••••" maxlength="20">
+    <button class="pw-btn" id="pwBtn">Confirm</button>
+    <div class="pw-err" id="pwErr">Incorrect password. Try again.</div>
+  </div>
+</div>
 
 <!-- SETUP -->
 <div id="setup">
@@ -254,7 +278,11 @@
 <!-- MAIN -->
 <div class="wrap">
   <div id="instrBanner" class="instr-banner" style="display:none;">
-    INSTRUCTOR VIEW — You can see all group answers and control scoring. Students cannot see this banner.
+    <span>INSTRUCTOR VIEW — You can see all group answers and control scoring.</span>
+    <span style="display:flex;align-items:center;gap:8px;">
+      <button class="reset-btn" id="resetBtn">↺ Reset All Data</button>
+      <button class="reset-confirm" id="resetConfirmBtn">Confirm Reset</button>
+    </span>
   </div>
 
   <header>
@@ -308,14 +336,14 @@
       <div class="sc-head">A Silicon Valley entrepreneur, age 38, inherited $2M and emailed Magellan after seeing a Forbes ad. He has never owned a boat.</div>
       <div class="sc-body" style="margin-top:12px;">
         He writes: <em>"I want something I can take from San Francisco Bay to the Pacific Coast. I don't know anything about boats but I have money and I want to learn. Your website confused me — what exactly do I get?"</em><br><br>
-        He is <strong>not</strong> Magellan's typical customer: age 38 (vs. typical 55–70), West Coast (Magellan is SE/Mid-Atlantic), zero boating experience. But he has real money and real intent. Work through the four questions below, then pitch to the class.
+        He is <strong>not</strong> Magellan's typical customer: age 38 (vs. typical 55–70), West Coast (Magellan is SE/Mid-Atlantic), zero boating experience. But he has real money and real intent.
       </div>
     </div>
     <div class="tasks">
       <div class="task"><div class="task-hd"><div class="tnum">1</div><div class="ttitle">Pursue this lead or pass?</div></div><div class="tbody">Use the case data. Does Magellan's funnel even reach him? <em>Cite at least one data point.</em></div></div>
       <div class="task"><div class="task-hd"><div class="tnum">2</div><div class="ttitle">Which salesperson gets assigned?</div></div><div class="tbody">Top two close at 14.3%; average five at 4.2%. He's an entrepreneur — but inexperienced. <em>Who gets the call, and what's the risk?</em></div></div>
       <div class="task"><div class="task-hd"><div class="tnum">3</div><div class="ttitle">Write the first email — 3 sentences max</div></div><div class="tbody">16% of buyers say the salesperson is most important. <em>Is the goal information, or getting him on a boat?</em></div></div>
-      <div class="task"><div class="task-hd"><div class="tnum">4</div><div class="ttitle">Does this change your target market view?</div></div><div class="tbody">Does pursuing him contradict narrowing the target to 55–70 SE entrepreneurs — or <em>expand</em> the definition?</div></div>
+      <div class="task"><div class="task-hd"><div class="tnum">4</div><div class="ttitle">Does this change your target market view?</div></div><div class="tbody">Does pursuing him contradict narrowing to 55–70 SE entrepreneurs — or <em>expand</em> the definition?</div></div>
     </div>
     <div class="ans-block">
       <div class="ans-lbl"><span>📝 Your group's answer — type key points here</span><span class="sync-badge" id="sync0"></span></div>
@@ -326,7 +354,7 @@
       <p><strong>(1)</strong> Pursue or pass — back it with one case data point. <strong>(2)</strong> Read your three-sentence email aloud. <strong>(3)</strong> Does this customer change your target market recommendation?</p>
     </div>
     <div class="foot">
-      <button class="nbtn" id="p0back" disabled>← Back</button>
+      <button class="nbtn" disabled>← Back</button>
       <button class="nbtn primary" id="p0next">Next Phase →</button>
     </div>
   </div>
@@ -336,38 +364,39 @@
     <div class="meta">
       <div class="meta-i"><div class="dot"></div>15 min group work</div>
       <div class="meta-i"><div class="dot g"></div>2-min pitch + Q&amp;A</div>
-      <div class="meta-i"><div class="dot r"></div>Every cut must cite a case number</div>
+      <div class="meta-i"><div class="dot r"></div>Every cut must cite Exhibit 1 or 3</div>
     </div>
     <div class="sc">
-      <div class="twist">Constraint: CFO Just Cut $300K</div>
+      <div class="twist">Real Scenario — From the Case</div>
       <div class="sc-eye">The Situation</div>
-      <div class="sc-head">Friday 5pm. CFO emails Robinson: "Cut $300K from your 2017 marketing budget. Protect revenue. You have the weekend."</div>
-      <div class="sc-body" style="margin-top:12px;">
-        Every channel serves a different funnel stage. Magellan's gross margin is approximately <strong>60%</strong>. One lost sale (~$650K boat) = <strong>$390K gross profit</strong> gone — more than the entire cut. Choose deliberately.
-      </div>
+      <div class="sc-head">Robinson asks his team to recommend cuts if the budget must be reduced by 10%. Total 2016 marketing &amp; sales spend was $8,010K — a 10% cut means finding ~$801K in savings.</div>
+      <div class="sc-body" style="margin-top:12px;">Every channel serves a different funnel stage. Magellan's gross margin is approximately <strong>60%</strong>. At an average price of <strong>$631K</strong>, one lost sale = roughly <strong>$379K gross profit</strong> — nearly half your entire cut target. Choose deliberately. All numbers below are from <strong>Exhibit 1</strong> (spend) and <strong>Exhibit 3</strong> (sales).</div>
     </div>
+
     <div class="pills">
-      <div class="pill r"><span class="lbl">Regional Magazines $/Sale</span><span class="val">$300K</span></div>
-      <div class="pill r"><span class="lbl">Boat Exhibitions $/Sale</span><span class="val">$183K</span></div>
+      <div class="pill r"><span class="lbl">Boat Exhibitions $/Sale (Exhibit 1÷3)</span><span class="val">$183K</span></div>
+      <div class="pill r"><span class="lbl">Regional Magazines $/Sale</span><span class="val">$250K</span></div>
+      <div class="pill r"><span class="lbl">Local Print $/Sale</span><span class="val">$62.5K</span></div>
       <div class="pill y"><span class="lbl">Cocktail Parties $/Sale</span><span class="val">$125K</span></div>
-      <div class="pill y"><span class="lbl">National Print $/Sale</span><span class="val">$100K</span></div>
+      <div class="pill y"><span class="lbl">Print Advertising $/Sale</span><span class="val">$100K</span></div>
       <div class="pill b"><span class="lbl">Direct Mail $/Sale</span><span class="val">$10K</span></div>
+      <div class="pill b"><span class="lbl">Captain's Catalogs $/Sale</span><span class="val">$6.25K</span></div>
       <div class="pill b"><span class="lbl">Google AdWords $/Sale</span><span class="val">$3.75K</span></div>
-      <div class="pill b"><span class="lbl">Catalogs $/Sale</span><span class="val">$6.25K</span></div>
     </div>
+
     <div class="tbl-wrap">
       <table class="btbl">
-        <thead><tr><th>Medium</th><th>2016 Spend</th><th>Decision</th><th>Justification — cite a data point</th></tr></thead>
+        <thead><tr><th>Medium (Exhibit 1)</th><th>2016 Spend</th><th>2016 Sales (Ex.3)</th><th>$/Sale</th><th>Your Decision</th><th>Justification — cite Ex. 1 or 3</th></tr></thead>
         <tbody id="btBody"></tbody>
       </table>
     </div>
     <div class="ans-block">
-      <div class="ans-lbl"><span>📝 Total cut summary — show your math</span><span class="sync-badge" id="sync1"></span></div>
-      <textarea class="ans-ta" id="a1" placeholder="e.g. Cut regional magazines ($200K) + exhibitions ($100K) = $300K total. Regional mags: $300K/sale with no improvement trend 2014–2016..." rows="4"></textarea>
+      <div class="ans-lbl"><span>📝 Total cut summary — must reach ~$801K. Show your math.</span><span class="sync-badge" id="sync1"></span></div>
+      <textarea class="ans-ta" id="a1" placeholder="e.g. Cut regional magazines ($200K, $250K/sale in 2016) + reduce exhibitions ($500K, cost/sale risen from $125K to $183K over 3 years) = $700K... What else gets you to $801K?" rows="4"></textarea>
     </div>
     <div class="deliv">
       <div class="deliv-lbl">⬆ Your Pitch — 2 Minutes</div>
-      <p>State your total cut and one data justification per major cut. <strong>Other groups can veto any cut if they cite a specific case data point that refutes it.</strong></p>
+      <p>State your total cut and one Exhibit 1 or 3 justification per major decision. <strong>Other groups can veto any cut by citing a specific case data point that refutes it.</strong> No data = no veto.</p>
     </div>
     <div class="foot">
       <button class="nbtn" id="p1back">← Back</button>
@@ -386,7 +415,7 @@
       <div class="twist">Role Play</div>
       <div class="sc-eye">The Situation</div>
       <div class="sc-head">An average rep (7 boats/year) sits down with Robinson: "Give me better leads and I'll close more. I work just as hard as anyone."</div>
-      <div class="sc-body" style="margin-top:12px;">Is she right about lead quality — or is it a skill gap? Your group works through the tasks below, then two members act out the first 60 seconds of the meeting.</div>
+      <div class="sc-body" style="margin-top:12px;">Is she right about lead quality — or is it a skill gap? Work through the tasks below, then two members act out the first 60 seconds of the meeting.</div>
     </div>
     <div class="pills">
       <div class="pill r"><span class="lbl">Top 2 — Prospect → 2nd Meeting</span><span class="val">~45%</span></div>
@@ -411,7 +440,7 @@
     </div>
     <div class="deliv">
       <div class="deliv-lbl">⬆ Your Pitch — Role Play + Answers</div>
-      <p>Two members act out the first 60 seconds of Robinson's meeting. Then state your one specific change, how you'd measure it, and your referral policy sentence. <strong>Class votes on the best referral policy.</strong></p>
+      <p>Two members act out the first 60 seconds of Robinson's meeting. Then: your one specific change, how you'd measure it, and your referral policy. <strong>Class votes on the best referral policy.</strong></p>
     </div>
     <div class="foot">
       <button class="nbtn" id="p2back">← Back</button>
@@ -431,7 +460,7 @@
       <div class="sc-head">Robinson walks into the CEO's office Monday morning with one recommendation. What is Magellan's single highest-leverage move for 2017?</div>
       <div class="sc-body" style="margin-top:12px;"><strong>You cannot say "all of the above."</strong> If the company can only do one thing exceptionally well in 2017, what is it?</div>
     </div>
-    <div class="vote-grid" id="voteGrid">
+    <div class="vote-grid">
       <div class="vopt" id="vA"><span class="v-letter">A</span><div class="v-text">Overhaul the media mix — cut print, shift to digital. Stop paying $300K per sale for regional magazines.</div></div>
       <div class="vopt" id="vB"><span class="v-letter">B</span><div class="v-text">Narrow to the entrepreneur profile and rewrite the message. Better targeting beats more spending.</div></div>
       <div class="vopt" id="vC"><span class="v-letter">C</span><div class="v-text">Fix the sales force gap — standardize first meetings on model boats and implement a referral system.</div></div>
@@ -473,12 +502,12 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase compat SDKs (work from file:// without CORS issues) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
 <script>
-const firebaseConfig = {
+document.addEventListener('DOMContentLoaded', function() {
+// ── CONFIG ──
+const INSTRUCTOR_PASSWORD = 'magellan2024';
+
+firebase.initializeApp({
   apiKey: "AIzaSyDbEcQKWYchOEcmFUL9yeRkB0MhEz3o2y4",
   authDomain: "magellan-case.firebaseapp.com",
   databaseURL: "https://magellan-case-default-rtdb.firebaseio.com",
@@ -486,34 +515,32 @@ const firebaseConfig = {
   storageBucket: "magellan-case.firebasestorage.app",
   messagingSenderId: "862253393532",
   appId: "1:862253393532:web:1347aff9c7ff164f19cbf9"
-};
-firebase.initializeApp(firebaseConfig);
+});
 const db = firebase.database();
-
-// Thin wrappers so rest of code stays unchanged
 function dbRef(path) { return db.ref(path); }
 function dbSet(r, val) { return r.set(val); }
 function dbOn(r, cb) { r.on('value', snap => cb(snap)); }
 
+// ── STATE ──
 const NG = 9, CITE_BONUS = 2;
 const PHASE_TIMES = [900, 900, 720, 600];
 const BUDGET = [
-  {name:'National/Regional Print', spend:'$1,050K'},
-  {name:'Google AdWords', spend:'$60K'},
-  {name:'Direct Mail', spend:'$120K'},
-  {name:'Boat Exhibitions', spend:'$220K'},
-  {name:'Cocktail Parties', spend:'$250K'},
-  {name:"Captain's Catalogs", spend:'$80K'},
+  {name:'Print advertising (e.g. Power & MotorYacht)', spend:'$1,100K', sales:'11', cps:'$100K'},
+  {name:'Regional magazines',                          spend:'$500K',   sales:'2',  cps:'$250K'},
+  {name:'Local print / free newspapers',               spend:'$250K',   sales:'4',  cps:'$62.5K'},
+  {name:'Google AdWords',                              spend:'$60K',    sales:'16', cps:'$3.75K'},
+  {name:'Direct mail',                                 spend:'$50K',    sales:'5',  cps:'$10K'},
+  {name:"Captain's Catalogs",                          spend:'$100K',   sales:'16', cps:'$6.25K'},
+  {name:'New boat exhibitions',                        spend:'$1,100K', sales:'6',  cps:'$183K'},
+  {name:'Cocktail parties on Magellan boats',          spend:'$500K',   sales:'4',  cps:'$125K'},
 ];
-
 let myGroup = null, isInstructor = false;
 let curPhase = 0, tRun = false, tIv = null, tTotal = 900, tRem = 900;
-let myVote = null, votesLocked = false;
-let syncTimers = {};
+let myVote = null;
+const syncDebounce = {};
 
-// ── Firebase connection check ──
-const connRef = dbRef('.info/connected');
-dbOn(connRef, snap => {
+// ── FIREBASE CONNECTION ──
+dbOn(dbRef('.info/connected'), snap => {
   const el = document.getElementById('connStatus');
   if (snap.val()) {
     el.textContent = '✓ Connected to live database';
@@ -524,78 +551,92 @@ dbOn(connRef, snap => {
   }
 });
 
-// ── Setup ──
-function confirmGroup() {
-  if (!myGroup) return;
-  document.getElementById('setup').classList.add('gone');
-  document.getElementById('gBadge').textContent = `Group ${myGroup}`;
-  buildBudgetTable();
-  buildScoringGrid();
-  setupScoreListeners();
-  setupAnswerListeners();
-  setupVoteListener();
-  showToast(`Welcome, Group ${myGroup}!`);
-};
-
-function enterInstructor() {
-  isInstructor = true;
-  myGroup = 'instructor';
-  document.getElementById('setup').classList.add('gone');
-  document.getElementById('gBadge').textContent = 'Instructor';
-  document.getElementById('gBadge').classList.add('instructor');
-  document.getElementById('instrBanner').style.display = 'block';
-  document.getElementById('answersViewer').style.display = 'block';
-  buildBudgetTable();
-  buildScoringGrid();
-  setupScoreListeners();
-  setupAnswerListeners();
-  setupVoteListener();
-  loadAnswersForViewer();
-  // Instructor can reveal votes
-  document.getElementById('showResBtn').style.display = 'block';
-  document.getElementById('resSection').classList.add('on');
-};
-
-// Group picker
+// ── GROUP PICKER ──
 (function() {
   const grid = document.getElementById('gpickGrid');
   for (let g = 1; g <= NG; g++) {
     const b = document.createElement('button');
-    b.className = 'gpick'; b.textContent = `Group ${g}`;
-    b.onclick = (() => { const gg = g; return () => {
+    b.className = 'gpick';
+    b.textContent = `Group ${g}`;
+    b.onclick = (function(gg, btn) { return function() {
       myGroup = gg;
       document.querySelectorAll('.gpick').forEach(x => x.classList.remove('sel'));
-      b.classList.add('sel');
+      btn.classList.add('sel');
       document.getElementById('goBtn').classList.add('ready');
-    }; })();
+    }; })(g, b);
     grid.appendChild(b);
   }
 })();
 
-// ── Phase nav ──
+// ── SETUP ENTRY ──
+function confirmGroup() {
+  if (!myGroup) return;
+  document.getElementById('setup').classList.add('gone');
+  document.getElementById('gBadge').textContent = 'Group ' + myGroup;
+  buildBudgetTable();
+  buildScoringGrid();
+  setupScoreListeners();
+  setupAnswerListeners();
+  setupVoteListener();
+  showToast('Welcome, Group ' + myGroup + '!');
+}
+
+function enterInstructor() {
+  document.getElementById('pwModal').classList.add('show');
+  document.getElementById('pwInput').focus();
+}
+
+function checkPassword() {
+  const val = document.getElementById('pwInput').value;
+  if (val === INSTRUCTOR_PASSWORD) {
+    document.getElementById('pwModal').classList.remove('show');
+    isInstructor = true;
+    myGroup = 'instructor';
+    document.getElementById('setup').classList.add('gone');
+    document.getElementById('gBadge').textContent = 'Instructor';
+    document.getElementById('gBadge').classList.add('instructor');
+    document.getElementById('instrBanner').style.display = 'block';
+    document.getElementById('answersViewer').style.display = 'block';
+    document.getElementById('resSection').classList.add('on');
+    document.getElementById('showResBtn').style.display = 'block';
+    buildBudgetTable();
+    buildScoringGrid();
+    setupScoreListeners();
+    setupVoteListener();
+    loadAnswersForViewer();
+    showToast('Instructor view activated');
+  } else {
+    const err = document.getElementById('pwErr');
+    err.style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+    setTimeout(() => { err.style.display = 'none'; }, 3000);
+  }
+}
+
+// ── PHASE NAV ──
 function goPhase(n) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.pnav').forEach(b => b.classList.remove('active'));
-  document.getElementById(`p${n}`).classList.add('on');
-  document.getElementById(`nav${n}`).classList.add('active');
-  if (curPhase !== n) document.getElementById(`nav${curPhase}`).classList.add('done');
+  document.getElementById('p' + n).classList.add('on');
+  document.getElementById('nav' + n).classList.add('active');
+  if (curPhase !== n) document.getElementById('nav' + curPhase).classList.add('done');
   curPhase = n;
   const pct = Math.round(((n + 1) / 4) * 100);
   document.getElementById('progFill').style.width = pct + '%';
-  document.getElementById('progLbl').textContent = `Phase ${n + 1} of 4`;
+  document.getElementById('progLbl').textContent = 'Phase ' + (n + 1) + ' of 4';
   document.getElementById('progPct').textContent = pct + '%';
   stopTimer(); tTotal = PHASE_TIMES[n]; tRem = tTotal; dispTimer(tRem);
-  refreshScoringStars();
   if (isInstructor) loadAnswersForViewer();
   window.scrollTo({top: 0, behavior: 'smooth'});
-};
+}
 
-// ── Timer ──
+// ── TIMER ──
 function dispTimer(s) {
   const m = String(Math.floor(s / 60)).padStart(2, '0');
   const sc = String(s % 60).padStart(2, '0');
   const el = document.getElementById('tDisp');
-  el.textContent = `${m}:${sc}`;
+  el.textContent = m + ':' + sc;
   el.className = 't-disp' + (s <= 60 ? ' hot' : s <= 180 ? ' warn' : '');
 }
 function startTimer() {
@@ -603,148 +644,143 @@ function startTimer() {
   tRun = true;
   document.getElementById('tStartBtn').textContent = '⏸ Pause';
   document.getElementById('tStartBtn').classList.add('on');
-  tIv = setInterval(() => { tRem--; dispTimer(tRem); if (tRem <= 0) { stopTimer(); document.getElementById('tDisp').textContent = 'TIME!'; }}, 1000);
-};
-function stopTimer() { clearInterval(tIv); tRun = false; document.getElementById('tStartBtn').textContent = '▶ Start'; document.getElementById('tStartBtn').classList.remove('on'); }
+  tIv = setInterval(function() {
+    tRem--;
+    dispTimer(tRem);
+    if (tRem <= 0) { stopTimer(); document.getElementById('tDisp').textContent = 'TIME!'; }
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(tIv); tRun = false;
+  document.getElementById('tStartBtn').textContent = '▶ Start';
+  document.getElementById('tStartBtn').classList.remove('on');
+}
 function resetTimer() { stopTimer(); tRem = tTotal; dispTimer(tRem); }
 function setPreset(v) { tTotal = parseInt(v); stopTimer(); tRem = tTotal; dispTimer(tRem); }
 dispTimer(tRem);
 
-// ── Budget table ──
+// ── BUDGET TABLE ──
 function buildBudgetTable() {
   const tb = document.getElementById('btBody');
-  BUDGET.forEach((r, i) => {
+  BUDGET.forEach(function(r, i) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.name}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;">${r.spend}</td>
-      <td><select class="dsel" id="bd${i}" ${isInstructor ? 'disabled' : ''}>
-        <option value="">— pick —</option>
-        <option value="cut">✂ Cut</option>
-        <option value="keep">✓ Keep</option>
-        <option value="grow">↑ Grow</option>
-      </select></td>
-      <td><textarea class="rta" id="br${i}" placeholder="Cite an exhibit or data point…" rows="2" ${isInstructor ? 'disabled' : ''}></textarea></td>`;
+    const dis = isInstructor ? 'disabled' : '';
+    tr.innerHTML = '<td>' + r.name + '</td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:12px;">' + r.spend + '</td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:12px;text-align:center;">' + r.sales + '</td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:12px;">' + r.cps + '</td>' +
+      '<td><select class="dsel" id="bd' + i + '" ' + dis + '>' +
+        '<option value="">— pick —</option>' +
+        '<option value="cut">✂ Cut</option>' +
+        '<option value="keep">✓ Keep</option>' +
+        '<option value="grow">↑ Grow</option>' +
+      '</select></td>' +
+      '<td><textarea class="rta" id="br' + i + '" placeholder="Cite Exhibit 1 or 3…" rows="2" ' + dis + '></textarea></td>';
     tb.appendChild(tr);
   });
-
-  // Delegated listeners on tbody
-  tb.addEventListener('change', () => { if (!isInstructor) syncBudget(); });
-  tb.addEventListener('input',  () => { if (!isInstructor) syncBudget(); });
-
+  tb.addEventListener('change', function() { if (!isInstructor) syncBudget(); });
+  tb.addEventListener('input', function() { if (!isInstructor) syncBudget(); });
   if (!isInstructor) loadBudgetFromFB();
 }
 
 function syncBudget() {
   if (isInstructor) return;
-  const data = BUDGET.map((_, i) => ({
-    d: document.getElementById(`bd${i}`)?.value || '',
-    r: document.getElementById(`br${i}`)?.value || ''
-  }));
-  dbSet(dbRef(`groups/${myGroup}/budget`), data);
-};
+  const data = BUDGET.map(function(_, i) {
+    return { d: (document.getElementById('bd' + i) || {}).value || '',
+             r: (document.getElementById('br' + i) || {}).value || '' };
+  });
+  dbSet(dbRef('groups/' + myGroup + '/budget'), data);
+}
 
 function loadBudgetFromFB() {
-  dbOn(dbRef(`groups/${myGroup}/budget`), snap => {
+  dbOn(dbRef('groups/' + myGroup + '/budget'), function(snap) {
     const data = snap.val();
     if (!data) return;
-    data.forEach((row, i) => {
-      const d = document.getElementById(`bd${i}`), r = document.getElementById(`br${i}`);
+    data.forEach(function(row, i) {
+      const d = document.getElementById('bd' + i), r = document.getElementById('br' + i);
       if (d && d !== document.activeElement) d.value = row.d || '';
       if (r && r !== document.activeElement) r.value = row.r || '';
     });
   });
 }
 
-function listenBudgetFromFB() {
-  // Instructor watches the currently viewed group — not implemented for simplicity
-  // Instructor sees answers via the answers viewer
-}
-
-// ── Answers sync ──
-const syncDebounce = {};
+// ── ANSWERS ──
 function queueSync(phase) {
-  const badge = document.getElementById(`sync${phase}`);
-  if (badge) { badge.textContent = ''; }
+  const badge = document.getElementById('sync' + phase);
+  if (badge) badge.textContent = '';
   clearTimeout(syncDebounce[phase]);
-  syncDebounce[phase] = setTimeout(() => syncAnswer(phase), 800);
-};
+  syncDebounce[phase] = setTimeout(function() { syncAnswer(phase); }, 800);
+}
 
 function syncAnswer(phase) {
   if (isInstructor) return;
-  const val = document.getElementById(`a${phase}`)?.value || '';
-  dbSet(dbRef(`groups/${myGroup}/answers/${phase}`), val).then(() => {
-    const badge = document.getElementById(`sync${phase}`);
-    if (badge) { badge.textContent = '✓ saved'; setTimeout(() => { badge.textContent = ''; }, 2000); }
+  const val = (document.getElementById('a' + phase) || {}).value || '';
+  dbSet(dbRef('groups/' + myGroup + '/answers/' + phase), val).then(function() {
+    const badge = document.getElementById('sync' + phase);
+    if (badge) { badge.textContent = '✓ saved'; setTimeout(function() { badge.textContent = ''; }, 2000); }
   });
 }
 
 function setupAnswerListeners() {
   if (isInstructor) return;
   for (let p = 0; p < 4; p++) {
-    ((phase) => {
-      dbOn(dbRef(`groups/${myGroup}/answers/${phase}`), snap => {
-        const el = document.getElementById(`a${phase}`);
+    (function(phase) {
+      dbOn(dbRef('groups/' + myGroup + '/answers/' + phase), function(snap) {
+        const el = document.getElementById('a' + phase);
         if (el && el !== document.activeElement) el.value = snap.val() || '';
       });
     })(p);
   }
 }
 
-// ── Answers viewer (instructor) ──
 function loadAnswersForViewer() {
   const cont = document.getElementById('avContent');
   cont.innerHTML = '';
   for (let g = 1; g <= NG; g++) {
-    ((grp) => {
-      dbOn(dbRef(`groups/${grp}/answers/${curPhase}`), snap => {
+    (function(grp) {
+      dbOn(dbRef('groups/' + grp + '/answers/' + curPhase), function(snap) {
         const val = snap.val() || '';
-        let card = document.getElementById(`av-g${grp}`);
+        let card = document.getElementById('av-g' + grp);
         if (!card) {
           card = document.createElement('div');
-          card.className = 'av-group'; card.id = `av-g${grp}`;
+          card.className = 'av-group';
+          card.id = 'av-g' + grp;
           cont.appendChild(card);
         }
-        card.innerHTML = `<div class="av-gname">Group ${grp}</div>
-          <div class="${val ? 'av-ans' : 'av-empty'}">${val || 'No answer yet'}</div>`;
+        card.innerHTML = '<div class="av-gname">Group ' + grp + '</div>' +
+          '<div class="' + (val ? 'av-ans' : 'av-empty') + '">' + (val || 'No answer yet') + '</div>';
       });
     })(g);
   }
 }
 
-// ── Scoring ──
+// ── SCORING ──
 function buildScoringGrid() {
   document.getElementById('scoringPanel').style.display = 'block';
   const grid = document.getElementById('scGrid');
   grid.innerHTML = '';
   for (let g = 1; g <= NG; g++) {
-    const card = document.createElement('div');
-    card.className = `sc-card${g === myGroup ? ' me' : ''}`;
-    card.id = `sc${g}`;
-    let stars = '';
     const canRate = (g !== myGroup || isInstructor);
+    const card = document.createElement('div');
+    card.className = 'sc-card' + (g === myGroup ? ' me' : '');
+    card.id = 'sc' + g;
+    let stars = '';
     for (let s = 1; s <= 5; s++) {
-      stars += `<span class="star${canRate ? '' : ' disabled'}" data-g="${g}" data-s="${s}">★</span>`;
+      stars += '<span class="star' + (canRate ? '' : ' disabled') + '" data-g="' + g + '" data-s="' + s + '">★</span>';
     }
     const isMe = g === myGroup && !isInstructor;
-    card.innerHTML = `
-      <div class="sc-gname${isMe ? ' me' : ''}">Group ${g}${isMe ? ' (you)' : ''}</div>
-      <div class="stars">${stars}</div>
-      <div class="sc-tally" id="tl${g}">Total: 0 pts</div>
-      <label class="cite-row">
-        <input type="checkbox" data-g="${g}" class="cite-cb" ${!canRate ? 'disabled' : ''}>
-        Cited data (+${CITE_BONUS}pts)
-      </label>`;
+    card.innerHTML =
+      '<div class="sc-gname' + (isMe ? ' me' : '') + '">Group ' + g + (isMe ? ' (you)' : '') + '</div>' +
+      '<div class="stars">' + stars + '</div>' +
+      '<div class="sc-tally" id="tl' + g + '">Total: 0 pts</div>' +
+      '<label class="cite-row"><input type="checkbox" data-g="' + g + '" class="cite-cb"' + (!canRate ? ' disabled' : '') + '> Cited data (+' + CITE_BONUS + 'pts)</label>';
     grid.appendChild(card);
   }
-
-  // Delegated listener for stars
-  grid.addEventListener('click', e => {
+  grid.addEventListener('click', function(e) {
     const star = e.target.closest('.star:not(.disabled)');
     if (star) setStar(parseInt(star.dataset.g), parseInt(star.dataset.s));
   });
-
-  // Delegated listener for cite checkboxes
-  grid.addEventListener('change', e => {
+  grid.addEventListener('change', function(e) {
     const cb = e.target.closest('.cite-cb:not(:disabled)');
     if (cb) setCite(parseInt(cb.dataset.g), cb.checked);
   });
@@ -752,55 +788,44 @@ function buildScoringGrid() {
 
 function setStar(g, s) {
   if (g === myGroup && !isInstructor) return;
-  const path = `scores/${g}/phases/${curPhase}/stars`;
-  dbSet(dbRef(path), s);
-};
+  dbSet(dbRef('scores/' + g + '/phases/' + curPhase + '/stars'), s);
+}
 
 function setCite(g, v) {
   if (g === myGroup && !isInstructor) return;
-  const path = `scores/${g}/phases/${curPhase}/cited`;
-  dbSet(dbRef(path), v);
-};
+  dbSet(dbRef('scores/' + g + '/phases/' + curPhase + '/cited'), v);
+}
 
 function setupScoreListeners() {
   for (let g = 1; g <= NG; g++) {
-    ((grp) => {
-      dbOn(dbRef(`scores/${grp}`), snap => {
+    (function(grp) {
+      dbOn(dbRef('scores/' + grp), function(snap) {
         const data = snap.val() || {};
         const phases = data.phases || {};
-        // Update stars for current phase
-        const curStars = phases[curPhase]?.stars || 0;
-        const card = document.getElementById(`sc${grp}`);
+        const curStars = (phases[curPhase] || {}).stars || 0;
+        const card = document.getElementById('sc' + grp);
         if (card) {
-          card.querySelectorAll('.star').forEach(el => {
+          card.querySelectorAll('.star').forEach(function(el) {
             el.classList.toggle('on', parseInt(el.dataset.s) <= curStars);
           });
-          // Update citation checkbox
           const ci = card.querySelector('.cite-cb');
-          if (ci) ci.checked = phases[curPhase]?.cited || false;
+          if (ci) ci.checked = (phases[curPhase] || {}).cited || false;
         }
-        // Compute total across all phases
         let total = 0;
         for (let p = 0; p < 4; p++) {
-          total += phases[p]?.stars || 0;
-          if (phases[p]?.cited) total += CITE_BONUS;
+          total += (phases[p] || {}).stars || 0;
+          if ((phases[p] || {}).cited) total += CITE_BONUS;
         }
-        const tl = document.getElementById(`tl${grp}`);
-        if (tl) tl.textContent = `Total: ${total} pts`;
+        const tl = document.getElementById('tl' + grp);
+        if (tl) tl.textContent = 'Total: ' + total + ' pts';
         renderLeaderboard();
       });
     })(g);
   }
 }
 
-function refreshScoringStars() {
-  // Firebase listeners update stars automatically when curPhase changes
-  // Just re-trigger by reading current DB state — handled by onValue listeners
-}
-
 function getTotal(g) {
-  // Read from DOM tallies for leaderboard
-  const tl = document.getElementById(`tl${g}`);
+  const tl = document.getElementById('tl' + g);
   if (!tl) return 0;
   const m = tl.textContent.match(/(\d+)/);
   return m ? parseInt(m[1]) : 0;
@@ -808,56 +833,52 @@ function getTotal(g) {
 
 function renderLeaderboard() {
   const rows = [];
-  for (let g = 1; g <= NG; g++) rows.push({g, pts: getTotal(g)});
-  rows.sort((a, b) => b.pts - a.pts);
-  const max = rows[0]?.pts || 1;
+  for (let g = 1; g <= NG; g++) rows.push({g: g, pts: getTotal(g)});
+  rows.sort(function(a, b) { return b.pts - a.pts; });
+  const max = rows[0] ? rows[0].pts : 1;
   const medals = ['🥇','🥈','🥉'];
-  const cont = document.getElementById('lbRows'); cont.innerHTML = '';
-  rows.forEach((row, i) => {
-    const d = document.createElement('div'); d.className = 'lb-row';
+  const cont = document.getElementById('lbRows');
+  cont.innerHTML = '';
+  rows.forEach(function(row, i) {
+    const d = document.createElement('div');
+    d.className = 'lb-row';
     const bw = max > 0 ? Math.round((row.pts / max) * 100) : 0;
-    const hi = row.g === myGroup ? 'color:var(--gold-light);font-weight:700;' : '';
-    d.innerHTML = `<div class="lb-rank">${medals[i] || i+1}</div>
-      <div class="lb-name" style="${hi}">Group ${row.g}${row.g === myGroup && !isInstructor ? ' ← you' : ''}</div>
-      <div class="lb-bw"><div class="lb-bf" style="width:${bw}%"></div></div>
-      <div class="lb-pts">${row.pts} pts</div>`;
+    const hi = row.g === myGroup ? 'font-weight:700;' : '';
+    d.innerHTML = '<div class="lb-rank">' + (medals[i] || (i + 1)) + '</div>' +
+      '<div class="lb-name" style="' + hi + '">Group ' + row.g + (row.g === myGroup && !isInstructor ? ' ← you' : '') + '</div>' +
+      '<div class="lb-bw"><div class="lb-bf" style="width:' + bw + '%"></div></div>' +
+      '<div class="lb-pts">' + row.pts + ' pts</div>';
     cont.appendChild(d);
   });
 }
 
-// ── Voting ──
+// ── VOTING ──
 function castVote(letter, el) {
-  if (votesLocked || isInstructor) return;
-  if (myVote) {
-    const updates = {};
-    updates[`votes/${myVote}`] = null; // decrement handled via transaction-like approach
-    // Simple: just overwrite this user's vote
-  }
+  if (isInstructor) return;
   myVote = letter;
-  // Store this group's vote
-  dbSet(dbRef(`votes/groups/${myGroup}`), letter);
-  document.querySelectorAll('.vopt').forEach(o => o.classList.remove('sel'));
+  dbSet(dbRef('votes/groups/' + myGroup), letter);
+  document.querySelectorAll('.vopt').forEach(function(o) { o.classList.remove('sel'); });
   el.classList.add('sel');
   showToast('Vote recorded!');
-};
+}
 
 function setupVoteListener() {
-  dbOn(dbRef('votes/groups'), snap => {
+  dbOn(dbRef('votes/groups'), function(snap) {
     const data = snap.val() || {};
     const tally = {A:0, B:0, C:0, D:0};
-    Object.values(data).forEach(v => { if (tally[v] !== undefined) tally[v]++; });
-    const total = Object.values(tally).reduce((a,b)=>a+b,0) || 1;
-    ['A','B','C','D'].forEach(l => {
+    Object.values(data).forEach(function(v) { if (tally[v] !== undefined) tally[v]++; });
+    const total = Object.values(tally).reduce(function(a,b){return a+b;}, 0) || 1;
+    ['A','B','C','D'].forEach(function(l) {
       const pct = Math.round((tally[l] / total) * 100);
-      const bar = document.getElementById(`b${l}`);
-      const cnt = document.getElementById(`c${l}`);
-      if (bar) { bar.style.width = Math.max(pct,3)+'%'; bar.textContent = pct+'%'; }
+      const bar = document.getElementById('b' + l);
+      const cnt = document.getElementById('c' + l);
+      if (bar) { bar.style.width = Math.max(pct, 3) + '%'; bar.textContent = pct + '%'; }
       if (cnt) cnt.textContent = tally[l];
     });
     if (myVote) {
-      document.querySelectorAll('.vopt').forEach(o => o.classList.remove('sel'));
-      const el = document.getElementById(`v${myVote}`);
-      if (el) el.classList.add('sel');
+      document.querySelectorAll('.vopt').forEach(function(o) { o.classList.remove('sel'); });
+      const sel = document.getElementById('v' + myVote);
+      if (sel) sel.classList.add('sel');
     }
   });
 }
@@ -866,46 +887,76 @@ function revealVotes() {
   document.getElementById('resSection').classList.add('on');
   document.getElementById('showResBtn').style.display = 'none';
   if (isInstructor) dbSet(dbRef('votes/revealed'), true);
-};
+}
 
-// Listen for reveal flag
-dbOn(dbRef('votes/revealed'), snap => {
+dbOn(dbRef('votes/revealed'), function(snap) {
   if (snap.val()) {
     document.getElementById('resSection').classList.add('on');
     document.getElementById('showResBtn').style.display = 'none';
   }
 });
 
-// ── Toast ──
+// ── TOAST ──
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2200);
 }
 
-// ── Wire up all buttons — must come after all function definitions ──
-document.getElementById('goBtn').addEventListener('click', () => confirmGroup());
-document.getElementById('instrBtn').addEventListener('click', () => enterInstructor());
-document.getElementById('tStartBtn').addEventListener('click', () => startTimer());
-document.getElementById('tResetBtn').addEventListener('click', () => resetTimer());
-document.getElementById('tPreset').addEventListener('change', e => setPreset(e.target.value));
-document.getElementById('nav0').addEventListener('click', () => goPhase(0));
-document.getElementById('nav1').addEventListener('click', () => goPhase(1));
-document.getElementById('nav2').addEventListener('click', () => goPhase(2));
-document.getElementById('nav3').addEventListener('click', () => goPhase(3));
-document.getElementById('p0next').addEventListener('click', () => goPhase(1));
-document.getElementById('p1back').addEventListener('click', () => goPhase(0));
-document.getElementById('p1next').addEventListener('click', () => goPhase(2));
-document.getElementById('p2back').addEventListener('click', () => goPhase(1));
-document.getElementById('p2next').addEventListener('click', () => goPhase(3));
-document.getElementById('p3back').addEventListener('click', () => goPhase(2));
-document.getElementById('showResBtn').addEventListener('click', () => revealVotes());
-document.getElementById('a0').addEventListener('input', () => queueSync(0));
-document.getElementById('a1').addEventListener('input', () => queueSync(1));
-document.getElementById('a2').addEventListener('input', () => queueSync(2));
-document.getElementById('a3').addEventListener('input', () => queueSync(3));
-['A','B','C','D'].forEach(l => {
-  document.getElementById(`v${l}`).addEventListener('click', () => castVote(l, document.getElementById(`v${l}`)));
+// ── RESET ──
+function resetAllData() {
+  const confirmBtn = document.getElementById('resetConfirmBtn');
+  confirmBtn.textContent = 'Resetting…';
+  confirmBtn.disabled = true;
+  Promise.all([
+    dbRef('scores').remove(),
+    dbRef('votes').remove(),
+    dbRef('groups').remove()
+  ]).then(function() {
+    showToast('Reset complete — reloading…');
+    setTimeout(function() { window.location.reload(); }, 1200);
+  }).catch(function(e) {
+    showToast('Reset failed: ' + e.message);
+    confirmBtn.textContent = 'Confirm Reset';
+    confirmBtn.disabled = false;
+  });
+}
+
+// ── EVENT LISTENERS ──
+document.getElementById('goBtn').addEventListener('click', confirmGroup);
+document.getElementById('instrBtn').addEventListener('click', enterInstructor);
+document.getElementById('pwBtn').addEventListener('click', checkPassword);
+document.getElementById('pwInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPassword(); });
+document.getElementById('tStartBtn').addEventListener('click', startTimer);
+document.getElementById('tResetBtn').addEventListener('click', resetTimer);
+document.getElementById('tPreset').addEventListener('change', function(e) { setPreset(e.target.value); });
+document.getElementById('nav0').addEventListener('click', function() { goPhase(0); });
+document.getElementById('nav1').addEventListener('click', function() { goPhase(1); });
+document.getElementById('nav2').addEventListener('click', function() { goPhase(2); });
+document.getElementById('nav3').addEventListener('click', function() { goPhase(3); });
+document.getElementById('p0next').addEventListener('click', function() { goPhase(1); });
+document.getElementById('p1back').addEventListener('click', function() { goPhase(0); });
+document.getElementById('p1next').addEventListener('click', function() { goPhase(2); });
+document.getElementById('p2back').addEventListener('click', function() { goPhase(1); });
+document.getElementById('p2next').addEventListener('click', function() { goPhase(3); });
+document.getElementById('p3back').addEventListener('click', function() { goPhase(2); });
+document.getElementById('showResBtn').addEventListener('click', revealVotes);
+document.getElementById('a0').addEventListener('input', function() { queueSync(0); });
+document.getElementById('a1').addEventListener('input', function() { queueSync(1); });
+document.getElementById('a2').addEventListener('input', function() { queueSync(2); });
+document.getElementById('a3').addEventListener('input', function() { queueSync(3); });
+['A','B','C','D'].forEach(function(l) {
+  document.getElementById('v' + l).addEventListener('click', function() {
+    castVote(l, document.getElementById('v' + l));
+  });
+});
+document.getElementById('resetBtn').addEventListener('click', function() {
+  const confirmBtn = document.getElementById('resetConfirmBtn');
+  confirmBtn.style.display = 'inline-block';
+  setTimeout(function() { confirmBtn.style.display = 'none'; }, 5000);
+});
+document.getElementById('resetConfirmBtn').addEventListener('click', resetAllData);
 });
 </script>
 </body>
