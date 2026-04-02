@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Magellan Boatworks — Group Activity</title>
+<title>Magellan Boatworks — Group Activity v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -29,7 +29,7 @@
   .s-title span{color:var(--gold-light);}
   .s-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
   .s-lbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:10px;}
-  .gpick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;}
+  .gpick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;min-height:60px;}
   .gpick{background:var(--bg2);border:2px solid var(--border);color:var(--text);font-family:'Playfair Display',serif;font-size:17px;font-weight:700;padding:13px 6px;border-radius:9px;cursor:pointer;transition:all .2s;}
   .gpick:hover{border-color:var(--teal);background:var(--teal-bg);}
   .gpick.sel{border-color:var(--gold-light);background:var(--gold-bg);color:var(--gold);}
@@ -573,15 +573,22 @@
     var b = document.createElement('button');
     b.className = 'gpick';
     b.textContent = 'Group ' + g;
+    b.style.cssText = 'display:block;width:100%;background:#edeae4;border:2px solid #d4cfc7;color:#2c3340;font-family:Georgia,serif;font-size:17px;font-weight:700;padding:13px 6px;border-radius:9px;cursor:pointer;box-sizing:border-box;';
     b.onclick = (function(gg, btn) { return function() {
       window._selectedGroup = gg;
-      document.querySelectorAll('.gpick').forEach(function(x) { x.classList.remove('sel'); });
-      btn.classList.add('sel');
+      document.querySelectorAll('.gpick').forEach(function(x) {
+        x.style.borderColor = '#d4cfc7';
+        x.style.background = '#edeae4';
+        x.style.color = '#2c3340';
+      });
+      btn.style.borderColor = '#c8953a';
+      btn.style.background = '#fdf3e3';
+      btn.style.color = '#a06e1a';
       document.getElementById('goBtn').classList.add('ready');
     }; })(g, b);
     grid.appendChild(b);
   }
-  console.log('Group picker built OK');
+  console.log('Group picker built — ' + grid.children.length + ' buttons');
 })();
 
 // Catch any errors that would break DOMContentLoaded
