@@ -243,7 +243,28 @@
   .toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;font-family:'DM Mono',monospace;font-size:12px;padding:10px 18px;border-radius:8px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
   .toast.show{opacity:1;transform:translateY(0);}
 
-  /* ── INSTRUCTOR BANNER ── */
+  /* ── SPOTLIGHT ── */
+  #spotlight{display:none;position:fixed;top:0;left:0;right:0;z-index:150;background:var(--teal);padding:12px 20px;text-align:center;box-shadow:0 2px 12px rgba(13,122,140,.3);}
+  #spotlight.show{display:block;}
+  .spotlight-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:3px;}
+  .spotlight-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;}
+
+  /* ── RANDOM PICKER ── */
+  .picker-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px;box-shadow:0 2px 8px var(--shadow);display:none;}
+  .picker-wrap.show{display:block;}
+  .picker-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+  .picker-btn{background:var(--teal);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:10px 22px;border-radius:8px;cursor:pointer;transition:background .2s;}
+  .picker-btn:hover{background:var(--teal-light);}
+  .picker-result{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy);margin-top:12px;min-height:30px;}
+  .picker-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+  .phase-pick-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .phase-pick-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s;}
+  .phase-pick-btn:hover{border-color:var(--teal);color:var(--teal);}
+  .phase-pick-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .already-picked{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:8px;}
+
+  /* ── TEAM NAME BADGE ── */
+  .team-name{font-size:11px;color:rgba(255,255,255,.8);display:block;margin-top:2px;font-weight:300;}
   .instr-banner{background:var(--gold-bg);border:1px solid rgba(160,110,26,.3);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 </style>
 </head>
@@ -269,20 +290,52 @@
     <br>
     <span class="s-lbl">Select your group number</span>
     <div class="gpick-grid" id="gpickGrid"></div>
+    <span class="s-lbl" style="margin-top:12px;">Enter your team name</span>
+    <input type="text" id="teamNameInput" placeholder="e.g. The Boat Builders" maxlength="30"
+      style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg2);margin-bottom:14px;outline:none;box-sizing:border-box;">
     <button class="s-go" id="goBtn">Enter War Room →</button>
     <br>
     <button class="instructor-btn" id="instrBtn">🔑 Instructor view</button>
   </div>
 </div>
 
+<!-- SPOTLIGHT BAR -->
+<div id="spotlight">
+  <div class="spotlight-label">🎤 Now Presenting</div>
+  <div class="spotlight-name" id="spotlightName">—</div>
+</div>
+
 <!-- MAIN -->
-<div class="wrap">
+<div class="wrap" id="mainWrap" style="padding-top:0;">
   <div id="instrBanner" class="instr-banner" style="display:none;">
-    <span>INSTRUCTOR VIEW — You can see all group answers and control scoring.</span>
+    <span>INSTRUCTOR VIEW — See all answers, pick groups randomly, control scoring.</span>
     <span style="display:flex;align-items:center;gap:8px;">
       <button class="reset-btn" id="resetBtn">↺ Reset All Data</button>
       <button class="reset-confirm" id="resetConfirmBtn">Confirm Reset</button>
     </span>
+  </div>
+
+  <!-- RANDOM PICKER (instructor only) -->
+  <div class="picker-wrap" id="pickerWrap">
+    <div class="picker-title">🎲 Random Group Picker</div>
+    <div class="phase-pick-btns" id="phasePickBtns">
+      <button class="phase-pick-btn active" data-phase="0">Phase 1</button>
+      <button class="phase-pick-btn" data-phase="1">Phase 2</button>
+      <button class="phase-pick-btn" data-phase="2">Phase 3</button>
+      <button class="phase-pick-btn" data-phase="3">Phase 4</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+      <button class="picker-btn" id="pickBtn">🎲 Pick a Group</button>
+      <button class="picker-btn" id="clearSpotBtn" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-size:12px;padding:8px 14px;">✕ Clear</button>
+      <button class="picker-btn" id="challengeBtn" style="background:var(--gold-bg);color:var(--gold);border:1px solid rgba(160,110,26,.3);font-size:12px;padding:8px 14px;">⚡ Challenge Bonus</button>
+    </div>
+    <div class="picker-result" id="pickerResult" style="margin-top:12px;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--teal);min-height:28px;"></div>
+    <div class="picker-sub" id="pickerSub" style="font-size:12px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace;"></div>
+    <div class="already-picked" id="alreadyPicked" style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;"></div>
+    <div id="challengePanel" style="display:none;margin-top:12px;background:var(--gold-bg);border:1px solid rgba(160,110,26,.25);border-radius:8px;padding:14px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">⚡ +2 pts — Which group cited case data?</div>
+      <div id="challengeGroupBtns" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+    </div>
   </div>
 
   <header>
@@ -293,7 +346,7 @@
     </div>
     <div class="hdr-right">
       <span class="live-dot">LIVE</span>
-      <div class="gbadge" id="gBadge">—</div>
+      <div class="gbadge" id="gBadge">—<span class="team-name" id="teamNameBadge"></span></div>
       <div class="timer-wrap">
         <span class="t-lbl">Time Remaining</span>
         <div class="t-disp" id="tDisp">15:00</div>
@@ -314,6 +367,13 @@
   <div class="prog-wrap">
     <div class="prog-lbl"><span id="progLbl">Phase 1 of 4</span><span id="progPct">25%</span></div>
     <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:25%"></div></div>
+  </div>
+
+  <!-- Student assignment banner -->
+  <div id="myAssignmentBanner" style="display:none;background:var(--teal-bg);border:1px solid rgba(13,122,140,.25);border-radius:9px;padding:12px 18px;margin-bottom:18px;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);">Your Assignment</span>
+    <span id="myAssignmentText" style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--navy);"></span>
+    <span id="myAssignmentNote" style="font-size:12px;color:var(--muted);"></span>
   </div>
 
   <nav class="phase-nav">
@@ -457,11 +517,13 @@
     </div>
     <div class="sc">
       <div class="sc-eye">The Final Question</div>
-      <div class="sc-head">Robinson walks into the CEO's office Monday morning with one recommendation. What is Magellan's single highest-leverage move for 2017?</div>
-      <div class="sc-body" style="margin-top:12px;"><strong>You cannot say "all of the above."</strong> If the company can only do one thing exceptionally well in 2017, what is it?</div>
+      <div class="sc-head">Robinson walks into the CEO's office Monday morning. He can only make one recommendation. What is it?</div>
+      <div class="sc-body" style="margin-top:12px;">
+        This is an <strong>individual vote</strong> — not a group decision. Every student picks independently before any discussion happens. Pick the option you genuinely believe is the highest-leverage move. <strong>You cannot say "all of the above."</strong> Your instructor will reveal the distribution and call on people from the minority opinion to defend their pick.
+      </div>
     </div>
     <div class="vote-grid">
-      <div class="vopt" id="vA"><span class="v-letter">A</span><div class="v-text">Overhaul the media mix — cut print, shift to digital. Stop paying $300K per sale for regional magazines.</div></div>
+      <div class="vopt" id="vA"><span class="v-letter">A</span><div class="v-text">Overhaul the media mix — cut print, shift to digital. Stop paying $250K per sale for regional magazines.</div></div>
       <div class="vopt" id="vB"><span class="v-letter">B</span><div class="v-text">Narrow to the entrepreneur profile and rewrite the message. Better targeting beats more spending.</div></div>
       <div class="vopt" id="vC"><span class="v-letter">C</span><div class="v-text">Fix the sales force gap — standardize first meetings on model boats and implement a referral system.</div></div>
       <div class="vopt" id="vD"><span class="v-letter">D</span><div class="v-text">Hold the line — in economic uncertainty, the worst move is a major change. Protect what's working.</div></div>
@@ -487,7 +549,7 @@
   <!-- ══ SCORING ══ -->
   <div class="scoring" id="scoringPanel" style="display:none;">
     <div class="sc2-title">📊 Live Scoreboard</div>
-    <div class="sc2-sub">After each group pitches — rate 1–5 stars and check if they cited case data. Updates on every device instantly.</div>
+    <div class="sc2-sub">Use the random picker above to call a group. Their card will be highlighted — rate them after they pitch. You don't need to rate every group, only those that present.</div>
     <div class="sc-grid" id="scGrid"></div>
     <div class="answers-viewer" id="answersViewer" style="display:none;">
       <div class="av-title">Group Answers — Current Phase</div>
@@ -503,20 +565,52 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// Build group picker immediately — before anything else
+(function() {
+  var grid = document.getElementById('gpickGrid');
+  if (!grid) { console.error('gpickGrid not found'); return; }
+  for (var g = 1; g <= 9; g++) {
+    var b = document.createElement('button');
+    b.className = 'gpick';
+    b.textContent = 'Group ' + g;
+    b.onclick = (function(gg, btn) { return function() {
+      window._selectedGroup = gg;
+      document.querySelectorAll('.gpick').forEach(function(x) { x.classList.remove('sel'); });
+      btn.classList.add('sel');
+      document.getElementById('goBtn').classList.add('ready');
+    }; })(g, b);
+    grid.appendChild(b);
+  }
+  console.log('Group picker built OK');
+})();
+
+// Catch any errors that would break DOMContentLoaded
+window.addEventListener('error', function(e) {
+  console.error('Global error:', e.message, e.filename, e.lineno);
+  // Show error on setup screen so we can debug
+  var conn = document.getElementById('connStatus');
+  if (conn) { conn.textContent = 'JS Error: ' + e.message; conn.className = 'conn-status err'; }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
 // ── CONFIG ──
 const INSTRUCTOR_PASSWORD = 'magellan2024';
 
-firebase.initializeApp({
-  apiKey: "AIzaSyDbEcQKWYchOEcmFUL9yeRkB0MhEz3o2y4",
-  authDomain: "magellan-case.firebaseapp.com",
-  databaseURL: "https://magellan-case-default-rtdb.firebaseio.com",
-  projectId: "magellan-case",
-  storageBucket: "magellan-case.firebasestorage.app",
-  messagingSenderId: "862253393532",
-  appId: "1:862253393532:web:1347aff9c7ff164f19cbf9"
-});
-const db = firebase.database();
+let db;
+try {
+  firebase.initializeApp({
+    apiKey: "AIzaSyDbEcQKWYchOEcmFUL9yeRkB0MhEz3o2y4",
+    authDomain: "magellan-case.firebaseapp.com",
+    databaseURL: "https://magellan-case-default-rtdb.firebaseio.com",
+    projectId: "magellan-case",
+    storageBucket: "magellan-case.firebasestorage.app",
+    messagingSenderId: "862253393532",
+    appId: "1:862253393532:web:1347aff9c7ff164f19cbf9"
+  });
+} catch(e) {
+  // Already initialized (e.g. hot reload) — get existing app
+}
+db = firebase.database();
 function dbRef(path) { return db.ref(path); }
 function dbSet(r, val) { return r.set(val); }
 function dbOn(r, cb) { r.on('value', snap => cb(snap)); }
@@ -534,10 +628,12 @@ const BUDGET = [
   {name:'New boat exhibitions',                        spend:'$1,100K', sales:'6',  cps:'$183K'},
   {name:'Cocktail parties on Magellan boats',          spend:'$500K',   sales:'4',  cps:'$125K'},
 ];
-let myGroup = null, isInstructor = false;
+let myGroup = null, isInstructor = false, myTeamName = '';
 let curPhase = 0, tRun = false, tIv = null, tTotal = 900, tRem = 900;
 let myVote = null;
 const syncDebounce = {};
+const pickedGroups = {0:[], 1:[], 2:[], 3:[]};
+let pickerPhase = 0;
 
 // ── FIREBASE CONNECTION ──
 dbOn(dbRef('.info/connected'), snap => {
@@ -551,34 +647,26 @@ dbOn(dbRef('.info/connected'), snap => {
   }
 });
 
-// ── GROUP PICKER ──
-(function() {
-  const grid = document.getElementById('gpickGrid');
-  for (let g = 1; g <= NG; g++) {
-    const b = document.createElement('button');
-    b.className = 'gpick';
-    b.textContent = `Group ${g}`;
-    b.onclick = (function(gg, btn) { return function() {
-      myGroup = gg;
-      document.querySelectorAll('.gpick').forEach(x => x.classList.remove('sel'));
-      btn.classList.add('sel');
-      document.getElementById('goBtn').classList.add('ready');
-    }; })(g, b);
-    grid.appendChild(b);
-  }
-})();
+// ── GROUP PICKER ── (built above, outside DOMContentLoaded)
+// myGroup is set here from window._selectedGroup on confirm
 
 // ── SETUP ENTRY ──
 function confirmGroup() {
-  if (!myGroup) return;
+  if (!window._selectedGroup) return;
+  myGroup = window._selectedGroup;
+  myTeamName = (document.getElementById('teamNameInput').value || '').trim() || ('Group ' + myGroup);
   document.getElementById('setup').classList.add('gone');
   document.getElementById('gBadge').textContent = 'Group ' + myGroup;
+  document.getElementById('teamNameBadge').textContent = myTeamName;
+  dbSet(dbRef('teams/' + myGroup), myTeamName);
   buildBudgetTable();
   buildScoringGrid();
   setupScoreListeners();
   setupAnswerListeners();
   setupVoteListener();
-  showToast('Welcome, Group ' + myGroup + '!');
+  setupSpotlightListener();
+  setupTeamNameListeners();
+  showToast('Welcome, ' + myTeamName + '!');
 }
 
 function enterInstructor() {
@@ -595,22 +683,26 @@ function checkPassword() {
     document.getElementById('setup').classList.add('gone');
     document.getElementById('gBadge').textContent = 'Instructor';
     document.getElementById('gBadge').classList.add('instructor');
-    document.getElementById('instrBanner').style.display = 'block';
+    document.getElementById('instrBanner').style.display = 'flex';
     document.getElementById('answersViewer').style.display = 'block';
     document.getElementById('resSection').classList.add('on');
     document.getElementById('showResBtn').style.display = 'block';
+    document.getElementById('pickerWrap').classList.add('show');
     buildBudgetTable();
     buildScoringGrid();
     setupScoreListeners();
     setupVoteListener();
+    setupSpotlightListener();
+    setupTeamNameListeners();
     loadAnswersForViewer();
+    buildPhasePickBtns();
     showToast('Instructor view activated');
   } else {
     const err = document.getElementById('pwErr');
     err.style.display = 'block';
     document.getElementById('pwInput').value = '';
     document.getElementById('pwInput').focus();
-    setTimeout(() => { err.style.display = 'none'; }, 3000);
+    setTimeout(function() { err.style.display = 'none'; }, 3000);
   }
 }
 
@@ -770,10 +862,11 @@ function buildScoringGrid() {
     }
     const isMe = g === myGroup && !isInstructor;
     card.innerHTML =
-      '<div class="sc-gname' + (isMe ? ' me' : '') + '">Group ' + g + (isMe ? ' (you)' : '') + '</div>' +
-      '<div class="stars">' + stars + '</div>' +
+      '<div class="sc-gname' + (isMe ? ' me' : '') + '" id="scname' + g + '">' + getTeamLabel(g) + (isMe ? ' (you)' : '') + '</div>' +
+      '<div class="stars" id="stars' + g + '">' + stars + '</div>' +
       '<div class="sc-tally" id="tl' + g + '">Total: 0 pts</div>' +
-      '<label class="cite-row"><input type="checkbox" data-g="' + g + '" class="cite-cb"' + (!canRate ? ' disabled' : '') + '> Cited data (+' + CITE_BONUS + 'pts)</label>';
+      '<label class="cite-row"><input type="checkbox" data-g="' + g + '" class="cite-cb"' + (!canRate ? ' disabled' : '') + '> Cited data (+' + CITE_BONUS + 'pts)</label>' +
+      '<div class="voted-badge" id="voted' + g + '" style="display:none;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--green);margin-top:4px;">✓ Rated</div>';
     grid.appendChild(card);
   }
   grid.addEventListener('click', function(e) {
@@ -788,7 +881,32 @@ function buildScoringGrid() {
 
 function setStar(g, s) {
   if (g === myGroup && !isInstructor) return;
-  dbSet(dbRef('scores/' + g + '/phases/' + curPhase + '/stars'), s);
+  // Check if already rated this group this phase
+  var raterKey = isInstructor ? 'instructor' : myGroup;
+  var ratedPath = 'scores/' + g + '/phases/' + curPhase + '/raters/' + raterKey;
+  dbRef(ratedPath).once('value', function(snap) {
+    if (snap.val() && !isInstructor) {
+      showToast('You already rated this group for this phase');
+      return;
+    }
+    // Save the star rating and mark this rater as done
+    var updates = {};
+    updates['scores/' + g + '/phases/' + curPhase + '/stars'] = s;
+    updates[ratedPath] = true;
+    db.ref().update(updates, function() {
+      // Lock stars visually for this rater
+      if (!isInstructor) lockStars(g);
+    });
+  });
+}
+
+function lockStars(g) {
+  var starsEl = document.getElementById('stars' + g);
+  if (starsEl) starsEl.querySelectorAll('.star').forEach(function(s) { s.classList.add('disabled'); });
+  var badge = document.getElementById('voted' + g);
+  if (badge) badge.style.display = 'block';
+  var cb = document.querySelector('#sc' + g + ' .cite-cb');
+  if (cb) cb.disabled = true;
 }
 
 function setCite(g, v) {
@@ -810,12 +928,19 @@ function setupScoreListeners() {
           });
           const ci = card.querySelector('.cite-cb');
           if (ci) ci.checked = (phases[curPhase] || {}).cited || false;
+          // Restore locked state if this rater already voted
+          if (!isInstructor && myGroup) {
+            var raterKey = myGroup;
+            var rated = phases[curPhase] && phases[curPhase].raters && phases[curPhase].raters[raterKey];
+            if (rated) lockStars(grp);
+          }
         }
         let total = 0;
         for (let p = 0; p < 4; p++) {
           total += (phases[p] || {}).stars || 0;
           if ((phases[p] || {}).cited) total += CITE_BONUS;
         }
+        total += data.challenge || 0;
         const tl = document.getElementById('tl' + grp);
         if (tl) tl.textContent = 'Total: ' + total + ' pts';
         renderLeaderboard();
@@ -845,7 +970,7 @@ function renderLeaderboard() {
     const bw = max > 0 ? Math.round((row.pts / max) * 100) : 0;
     const hi = row.g === myGroup ? 'font-weight:700;' : '';
     d.innerHTML = '<div class="lb-rank">' + (medals[i] || (i + 1)) + '</div>' +
-      '<div class="lb-name" style="' + hi + '">Group ' + row.g + (row.g === myGroup && !isInstructor ? ' ← you' : '') + '</div>' +
+      '<div class="lb-name" style="' + hi + '">' + getTeamLabel(row.g) + (row.g === myGroup && !isInstructor ? ' ← you' : '') + '</div>' +
       '<div class="lb-bw"><div class="lb-bf" style="width:' + bw + '%"></div></div>' +
       '<div class="lb-pts">' + row.pts + ' pts</div>';
     cont.appendChild(d);
@@ -904,7 +1029,278 @@ function showToast(msg) {
   setTimeout(function() { t.classList.remove('show'); }, 2200);
 }
 
-// ── RESET ──
+// ── TEAM NAMES ──
+let teamNames = {};
+function setupTeamNameListeners() {
+  dbOn(dbRef('teams'), function(snap) {
+    teamNames = snap.val() || {};
+    refreshScoringNames();
+    renderLeaderboard();
+    if (isInstructor) buildChallengeGroupBtns();
+    // Refresh picker result if it shows a stale "Group N" label
+    var result = document.getElementById('pickerResult');
+    if (result && result.textContent.indexOf('Now presenting:') === 0) {
+      // Re-render with latest team name
+      for (var g = 1; g <= NG; g++) {
+        if (result.textContent.indexOf('Group ' + g) !== -1 && teamNames[g]) {
+          result.textContent = 'Now presenting: ' + teamNames[g];
+          break;
+        }
+      }
+    }
+  });
+}
+function getTeamLabel(g) {
+  return (teamNames[g] && teamNames[g].trim()) ? teamNames[g] : ('Group ' + g);
+}
+function refreshScoringNames() {
+  for (var g = 1; g <= NG; g++) {
+    var el = document.getElementById('scname' + g);
+    if (el) el.textContent = getTeamLabel(g) + (g === myGroup && !isInstructor ? ' (you)' : '');
+  }
+}
+
+// ── SPOTLIGHT ──
+function setupSpotlightListener() {
+  dbOn(dbRef('spotlight'), function(snap) {
+    var data = snap.val();
+    var el = document.getElementById('spotlight');
+    var nameEl = document.getElementById('spotlightName');
+    if (data && data.group) {
+      nameEl.textContent = getTeamLabel(data.group) + ' — Group ' + data.group;
+      el.classList.add('show');
+      document.getElementById('mainWrap').style.paddingTop = '70px';
+    } else {
+      el.classList.remove('show');
+      document.getElementById('mainWrap').style.paddingTop = '0';
+    }
+  });
+}
+function setSpotlight(g) { dbSet(dbRef('spotlight'), g ? { group: g } : null); }
+
+// ── ASSIGNMENTS ──
+function doAssign() {
+  var groups = [];
+  for (var i = 1; i <= NG; i++) groups.push(i);
+  // Fisher-Yates shuffle
+  for (var i = groups.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = groups[i]; groups[i] = groups[j]; groups[j] = tmp;
+  }
+  var a = {
+    0: [groups[0], groups[1], groups[2]],
+    1: [groups[3], groups[4], groups[5]],
+    2: [groups[6], groups[7], groups[8]],
+    3: 'all'
+  };
+  dbSet(dbRef('assignments'), a);
+}
+
+function setupAssignmentListener() {
+  dbOn(dbRef('assignments'), function(snap) {
+    var data = snap.val();
+    if (!data) return;
+    assignments = data;
+    if (isInstructor) renderAssignmentGrid();
+    updateMyAssignmentBanner();
+  });
+}
+
+function renderAssignmentGrid() {
+  var grid = document.getElementById('assignmentGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  var phaseLabels = ['Phase 1 — The New Lead', 'Phase 2 — Budget Cuts', 'Phase 3 — Sales Force'];
+  var bgColors = ['var(--teal-bg)', 'var(--gold-bg)', 'var(--coral-bg)'];
+  var txtColors = ['var(--teal)', 'var(--gold)', 'var(--coral)'];
+  for (var p = 0; p < 3; p++) {
+    var grps = assignments[p] || [];
+    var names = grps.map(function(g) { return getTeamLabel(g) + ' (G' + g + ')'; });
+    var card = document.createElement('div');
+    card.style.cssText = 'background:' + bgColors[p] + ';border-radius:8px;padding:12px;border:1px solid rgba(0,0,0,.07);';
+    card.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:' + txtColors[p] + ';margin-bottom:7px;">' + phaseLabels[p] + '</div>' +
+      '<div style="font-size:13px;color:var(--navy);line-height:1.8;">' + names.join('<br>') + '</div>';
+    grid.appendChild(card);
+  }
+  var p4 = document.createElement('div');
+  p4.style.cssText = 'background:var(--bg2);border-radius:8px;padding:12px;border:1px solid var(--border);';
+  p4.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;">Phase 4 — Final Verdict</div>' +
+    '<div style="font-size:13px;color:var(--navy);">All 9 groups vote + defend</div>';
+  grid.appendChild(p4);
+  document.getElementById('assignmentDisplay').style.display = 'block';
+  buildChallengeGroupBtns();
+}
+
+function updateMyAssignmentBanner() {
+  if (!assignments || !myGroup || isInstructor) return;
+  var banner = document.getElementById('myAssignmentBanner');
+  var textEl = document.getElementById('myAssignmentText');
+  var noteEl = document.getElementById('myAssignmentNote');
+  var phaseLabels = ['Phase 1', 'Phase 2', 'Phase 3'];
+  var borderColors = ['rgba(13,122,140,.35)', 'rgba(160,110,26,.35)', 'rgba(192,57,43,.35)'];
+  var myPhase = -1;
+  for (var p = 0; p < 3; p++) {
+    var grps = assignments[p];
+    if (grps && grps.indexOf && grps.indexOf(parseInt(myGroup)) !== -1) { myPhase = p; break; }
+  }
+  banner.style.display = 'flex';
+  if (myPhase >= 0) {
+    textEl.textContent = 'You present in ' + phaseLabels[myPhase];
+    noteEl.textContent = 'Prepare your pitch. You can also earn a +2 Challenge Bonus in any other phase.';
+    banner.style.borderColor = borderColors[myPhase];
+  } else {
+    textEl.textContent = 'You present in Phase 4 (everyone)';
+    noteEl.textContent = 'Listen closely — earn +2 Challenge Bonus any phase by citing case data.';
+  }
+}
+
+// ── PHASE PICK BUTTONS ──
+function buildPhasePickBtns() {
+  var btns = document.querySelectorAll('.phase-pick-btn');
+  btns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      pickerPhase = parseInt(btn.dataset.phase);
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('pickerResult').textContent = '';
+      document.getElementById('pickerSub').textContent = '';
+      document.getElementById('alreadyPicked').textContent = '';
+    });
+  });
+}
+
+// ── RANDOM PICKER ──
+const PICKS_PER_PHASE = 3;
+
+function pickRandom() {
+  // Stop after 3 picks per phase
+  if (pickedGroups[pickerPhase].length >= PICKS_PER_PHASE) {
+    document.getElementById('pickerResult').textContent = 'All 3 groups have presented this phase!';
+    document.getElementById('pickerResult').style.color = 'var(--green)';
+    document.getElementById('pickerSub').textContent = 'Switch to the next phase tab.';
+    document.getElementById('alreadyPicked').textContent = 'Presented: ' + pickedGroups[pickerPhase].map(function(g) {
+      return (teamNames[g] && teamNames[g].trim()) ? teamNames[g] : ('Group ' + g);
+    }).join(' · ');
+    return;
+  }
+  // All 9 groups in pool, no repeats within a phase
+  var available = [];
+  for (var g = 1; g <= NG; g++) {
+    if (pickedGroups[pickerPhase].indexOf(g) === -1) available.push(g);
+  }
+  var result = document.getElementById('pickerResult');
+  var sub = document.getElementById('pickerSub');
+  document.getElementById('pickBtn').disabled = true;
+  var spins = 0, maxSpins = 14;
+  var spinInterval = setInterval(function() {
+    result.textContent = getTeamLabel(available[Math.floor(Math.random() * available.length)]);
+    result.style.color = 'var(--muted)';
+    spins++;
+    if (spins >= maxSpins) {
+      clearInterval(spinInterval);
+      document.getElementById('pickBtn').disabled = false;
+      var chosen = available[Math.floor(Math.random() * available.length)];
+      pickedGroups[pickerPhase].push(chosen);
+      var label = (teamNames[chosen] && teamNames[chosen].trim()) ? teamNames[chosen] : ('Group ' + chosen);
+      result.textContent = label;
+      result.style.color = 'var(--teal)';
+      var soFar = pickedGroups[pickerPhase].length;
+      var remaining = PICKS_PER_PHASE - soFar;
+      if (remaining > 0) {
+        sub.textContent = remaining + ' group' + (remaining !== 1 ? 's' : '') + ' still to present this phase';
+      } else {
+        sub.textContent = 'All 3 groups have presented this phase!';
+        result.style.color = 'var(--green)';
+      }
+      if (soFar > 1) {
+        var prev = pickedGroups[pickerPhase].slice(0, -1).map(function(g) {
+          return (teamNames[g] && teamNames[g].trim()) ? teamNames[g] : ('Group ' + g);
+        });
+        document.getElementById('alreadyPicked').textContent = 'Already presented: ' + prev.join(' · ');
+      } else {
+        document.getElementById('alreadyPicked').textContent = '';
+      }
+      setSpotlight(chosen);
+      highlightScoreCard(chosen);
+    }
+  }, 70);
+}
+  var result = document.getElementById('pickerResult');
+  var sub = document.getElementById('pickerSub');
+  document.getElementById('pickBtn').disabled = true;
+  var spins = 0, maxSpins = 14;
+  var spinInterval = setInterval(function() {
+    result.textContent = getTeamLabel(available[Math.floor(Math.random() * available.length)]);
+    result.style.color = 'var(--muted)';
+    spins++;
+    if (spins >= maxSpins) {
+      clearInterval(spinInterval);
+      document.getElementById('pickBtn').disabled = false;
+      var chosen = available[Math.floor(Math.random() * available.length)];
+      pickedGroups[pickerPhase].push(chosen);
+      // Use team name if loaded, otherwise just group number — will look fine either way
+      var label = teamNames[chosen] ? teamNames[chosen] : ('Group ' + chosen);
+      result.textContent = 'Now presenting: ' + label;
+      result.style.color = 'var(--teal)';
+      var remaining = available.length - 1;
+      sub.textContent = remaining + ' group' + (remaining !== 1 ? 's' : '') + ' remaining this phase';
+      // Only show "already presented" once there are 2+ picks
+      if (pickedGroups[pickerPhase].length > 1) {
+        var prev = pickedGroups[pickerPhase].slice(0, -1).map(function(g) {
+          return teamNames[g] ? teamNames[g] : ('Group ' + g);
+        });
+        document.getElementById('alreadyPicked').textContent = 'Already presented: ' + prev.join(' · ');
+      } else {
+        document.getElementById('alreadyPicked').textContent = '';
+      }
+      setSpotlight(chosen);
+      highlightScoreCard(chosen);
+    }
+  }, 70);
+}
+
+function highlightScoreCard(g) {
+  document.querySelectorAll('.sc-card').forEach(function(c) {
+    c.style.outline = '';
+    c.style.boxShadow = '';
+  });
+  var card = document.getElementById('sc' + g);
+  if (!card) return;
+  card.style.outline = '2px solid var(--teal)';
+  card.style.boxShadow = '0 0 0 4px rgba(13,122,140,.15)';
+  var panel = document.getElementById('scoringPanel');
+  if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── CHALLENGE BONUS ──
+function buildChallengeGroupBtns() {
+  var cont = document.getElementById('challengeGroupBtns');
+  if (!cont) return;
+  cont.innerHTML = '';
+  for (var g = 1; g <= NG; g++) {
+    var btn = document.createElement('button');
+    btn.style.cssText = 'background:var(--white);border:1px solid var(--border);color:var(--text);font-family:\'DM Sans\',sans-serif;font-size:12px;padding:6px 12px;border-radius:6px;cursor:pointer;margin:2px;';
+    btn.textContent = getTeamLabel(g);
+    btn.dataset.g = g;
+    btn.addEventListener('click', function() {
+      awardChallenge(parseInt(this.dataset.g));
+      document.getElementById('challengePanel').style.display = 'none';
+    });
+    cont.appendChild(btn);
+  }
+}
+
+function awardChallenge(g) {
+  var chalRef = dbRef('scores/' + g + '/challenge');
+  chalRef.once('value', function(snap) {
+    var current = snap.val() || 0;
+    dbSet(chalRef, current + 2);
+    showToast('+2 challenge bonus to ' + getTeamLabel(g));
+  });
+}
+
+
+// ── RESET (updated to also clear spotlight and teams) ──
 function resetAllData() {
   const confirmBtn = document.getElementById('resetConfirmBtn');
   confirmBtn.textContent = 'Resetting…';
@@ -912,8 +1308,13 @@ function resetAllData() {
   Promise.all([
     dbRef('scores').remove(),
     dbRef('votes').remove(),
-    dbRef('groups').remove()
+    dbRef('groups').remove(),
+    dbRef('spotlight').remove()
   ]).then(function() {
+    for (var p = 0; p < 4; p++) pickedGroups[p] = [];
+    document.getElementById('pickerResult').textContent = '';
+    document.getElementById('pickerSub').textContent = '';
+    document.getElementById('alreadyPicked').textContent = '';
     showToast('Reset complete — reloading…');
     setTimeout(function() { window.location.reload(); }, 1200);
   }).catch(function(e) {
@@ -946,17 +1347,35 @@ document.getElementById('a0').addEventListener('input', function() { queueSync(0
 document.getElementById('a1').addEventListener('input', function() { queueSync(1); });
 document.getElementById('a2').addEventListener('input', function() { queueSync(2); });
 document.getElementById('a3').addEventListener('input', function() { queueSync(3); });
+document.getElementById('pickBtn').addEventListener('click', pickRandom);
+document.getElementById('challengeBtn').addEventListener('click', function() {
+  var panel = document.getElementById('challengePanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('clearSpotBtn').addEventListener('click', function() {
+  setSpotlight(null);
+  document.querySelectorAll('.sc-card').forEach(function(c) {
+    c.style.outline = '';
+    c.style.boxShadow = '';
+  });
+  document.getElementById('pickerResult').textContent = '';
+  document.getElementById('pickerSub').textContent = '';
+});
 ['A','B','C','D'].forEach(function(l) {
   document.getElementById('v' + l).addEventListener('click', function() {
     castVote(l, document.getElementById('v' + l));
   });
 });
 document.getElementById('resetBtn').addEventListener('click', function() {
-  const confirmBtn = document.getElementById('resetConfirmBtn');
+  var confirmBtn = document.getElementById('resetConfirmBtn');
   confirmBtn.style.display = 'inline-block';
   setTimeout(function() { confirmBtn.style.display = 'none'; }, 5000);
 });
 document.getElementById('resetConfirmBtn').addEventListener('click', resetAllData);
+// Dismiss spotlight when instructor clicks it
+document.getElementById('spotlight').addEventListener('click', function() {
+  if (isInstructor) setSpotlight(null);
+});
 });
 </script>
 </body>
