@@ -565,7 +565,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Build group picker immediately — before anything else
+// Build group picker immediately  -  before anything else
 (function() {
   var grid = document.getElementById('gpickGrid');
   if (!grid) { console.error('gpickGrid not found'); return; }
@@ -588,7 +588,7 @@
     }; })(g, b);
     grid.appendChild(b);
   }
-  console.log('Group picker built — ' + grid.children.length + ' buttons');
+  console.log('Group picker built  -  ' + grid.children.length + ' buttons');
 })();
 
 // Catch any errors that would break DOMContentLoaded
@@ -604,23 +604,38 @@ document.addEventListener('DOMContentLoaded', function() {
 const INSTRUCTOR_PASSWORD = 'magellan2024';
 
 let db;
-try {
-  firebase.initializeApp({
-    apiKey: "AIzaSyDbEcQKWYchOEcmFUL9yeRkB0MhEz3o2y4",
-    authDomain: "magellan-case.firebaseapp.com",
-    databaseURL: "https://magellan-case-default-rtdb.firebaseio.com",
-    projectId: "magellan-case",
-    storageBucket: "magellan-case.firebasestorage.app",
-    messagingSenderId: "862253393532",
-    appId: "1:862253393532:web:1347aff9c7ff164f19cbf9"
-  });
-} catch(e) {
-  // Already initialized (e.g. hot reload) — get existing app
+function makeStubRef() {
+  return {
+    set: function() { return Promise.resolve(); },
+    on: function() {},
+    once: function(e, cb) { cb({ val: function() { return null; } }); },
+    remove: function() { return Promise.resolve(); },
+    update: function() { return Promise.resolve(); }
+  };
 }
-db = firebase.database();
-function dbRef(path) { return db.ref(path); }
-function dbSet(r, val) { return r.set(val); }
-function dbOn(r, cb) { r.on('value', snap => cb(snap)); }
+function dbRef(path) { return db ? db.ref(path) : makeStubRef(); }
+function dbSet(r, val) { try { return r.set(val); } catch(e) { return Promise.resolve(); } }
+function dbOn(r, cb) { try { r.on('value', function(snap) { cb(snap); }); } catch(e) {} }
+
+try {
+  if (typeof firebase === 'undefined') throw new Error('SDK not loaded');
+  try {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDbEcQKWYchOEcmFUL9yeRkB0MhEz3o2y4",
+      authDomain: "magellan-case.firebaseapp.com",
+      databaseURL: "https://magellan-case-default-rtdb.firebaseio.com",
+      projectId: "magellan-case",
+      storageBucket: "magellan-case.firebasestorage.app",
+      messagingSenderId: "862253393532",
+      appId: "1:862253393532:web:1347aff9c7ff164f19cbf9"
+    });
+  } catch(e2) { /* already initialized */ }
+  db = firebase.database();
+} catch(e) {
+  console.warn('Firebase unavailable:', e.message);
+  var connEl = document.getElementById('connStatus');
+  if (connEl) { connEl.textContent = 'Firebase unavailable - check connection'; connEl.className = 'conn-status err'; }
+}
 
 // ── STATE ──
 const NG = 9, CITE_BONUS = 2;
@@ -646,10 +661,10 @@ let pickerPhase = 0;
 dbOn(dbRef('.info/connected'), snap => {
   const el = document.getElementById('connStatus');
   if (snap.val()) {
-    el.textContent = '✓ Connected to live database';
+    el.textContent = 'check Connected to live database';
     el.className = 'conn-status ok';
   } else {
-    el.textContent = '⚠ Reconnecting…';
+    el.textContent = '⚠ Reconnecting...';
     el.className = 'conn-status err';
   }
 });
@@ -769,12 +784,12 @@ function buildBudgetTable() {
       '<td style="font-family:\'DM Mono\',monospace;font-size:12px;text-align:center;">' + r.sales + '</td>' +
       '<td style="font-family:\'DM Mono\',monospace;font-size:12px;">' + r.cps + '</td>' +
       '<td><select class="dsel" id="bd' + i + '" ' + dis + '>' +
-        '<option value="">— pick —</option>' +
+        '<option value=""> -  pick  - </option>' +
         '<option value="cut">✂ Cut</option>' +
-        '<option value="keep">✓ Keep</option>' +
+        '<option value="keep">check Keep</option>' +
         '<option value="grow">↑ Grow</option>' +
       '</select></td>' +
-      '<td><textarea class="rta" id="br' + i + '" placeholder="Cite Exhibit 1 or 3…" rows="2" ' + dis + '></textarea></td>';
+      '<td><textarea class="rta" id="br' + i + '" placeholder="Cite Exhibit 1 or 3..." rows="2" ' + dis + '></textarea></td>';
     tb.appendChild(tr);
   });
   tb.addEventListener('change', function() { if (!isInstructor) syncBudget(); });
@@ -816,7 +831,7 @@ function syncAnswer(phase) {
   const val = (document.getElementById('a' + phase) || {}).value || '';
   dbSet(dbRef('groups/' + myGroup + '/answers/' + phase), val).then(function() {
     const badge = document.getElementById('sync' + phase);
-    if (badge) { badge.textContent = '✓ saved'; setTimeout(function() { badge.textContent = ''; }, 2000); }
+    if (badge) { badge.textContent = 'check saved'; setTimeout(function() { badge.textContent = ''; }, 2000); }
   });
 }
 
@@ -873,7 +888,7 @@ function buildScoringGrid() {
       '<div class="stars" id="stars' + g + '">' + stars + '</div>' +
       '<div class="sc-tally" id="tl' + g + '">Total: 0 pts</div>' +
       '<label class="cite-row"><input type="checkbox" data-g="' + g + '" class="cite-cb"' + (!canRate ? ' disabled' : '') + '> Cited data (+' + CITE_BONUS + 'pts)</label>' +
-      '<div class="voted-badge" id="voted' + g + '" style="display:none;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--green);margin-top:4px;">✓ Rated</div>';
+      '<div class="voted-badge" id="voted' + g + '" style="display:none;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--green);margin-top:4px;">check Rated</div>';
     grid.appendChild(card);
   }
   grid.addEventListener('click', function(e) {
@@ -977,7 +992,7 @@ function renderLeaderboard() {
     const bw = max > 0 ? Math.round((row.pts / max) * 100) : 0;
     const hi = row.g === myGroup ? 'font-weight:700;' : '';
     d.innerHTML = '<div class="lb-rank">' + (medals[i] || (i + 1)) + '</div>' +
-      '<div class="lb-name" style="' + hi + '">' + getTeamLabel(row.g) + (row.g === myGroup && !isInstructor ? ' ← you' : '') + '</div>' +
+      '<div class="lb-name" style="' + hi + '">' + getTeamLabel(row.g) + (row.g === myGroup && !isInstructor ? ' <- you' : '') + '</div>' +
       '<div class="lb-bw"><div class="lb-bf" style="width:' + bw + '%"></div></div>' +
       '<div class="lb-pts">' + row.pts + ' pts</div>';
     cont.appendChild(d);
@@ -1074,7 +1089,7 @@ function setupSpotlightListener() {
     var el = document.getElementById('spotlight');
     var nameEl = document.getElementById('spotlightName');
     if (data && data.group) {
-      nameEl.textContent = getTeamLabel(data.group) + ' — Group ' + data.group;
+      nameEl.textContent = getTeamLabel(data.group) + '  -  Group ' + data.group;
       el.classList.add('show');
       document.getElementById('mainWrap').style.paddingTop = '70px';
     } else {
@@ -1117,7 +1132,7 @@ function renderAssignmentGrid() {
   var grid = document.getElementById('assignmentGrid');
   if (!grid) return;
   grid.innerHTML = '';
-  var phaseLabels = ['Phase 1 — The New Lead', 'Phase 2 — Budget Cuts', 'Phase 3 — Sales Force'];
+  var phaseLabels = ['Phase 1  -  The New Lead', 'Phase 2  -  Budget Cuts', 'Phase 3  -  Sales Force'];
   var bgColors = ['var(--teal-bg)', 'var(--gold-bg)', 'var(--coral-bg)'];
   var txtColors = ['var(--teal)', 'var(--gold)', 'var(--coral)'];
   for (var p = 0; p < 3; p++) {
@@ -1131,7 +1146,7 @@ function renderAssignmentGrid() {
   }
   var p4 = document.createElement('div');
   p4.style.cssText = 'background:var(--bg2);border-radius:8px;padding:12px;border:1px solid var(--border);';
-  p4.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;">Phase 4 — Final Verdict</div>' +
+  p4.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;">Phase 4  -  Final Verdict</div>' +
     '<div style="font-size:13px;color:var(--navy);">All 9 groups vote + defend</div>';
   grid.appendChild(p4);
   document.getElementById('assignmentDisplay').style.display = 'block';
@@ -1157,7 +1172,7 @@ function updateMyAssignmentBanner() {
     banner.style.borderColor = borderColors[myPhase];
   } else {
     textEl.textContent = 'You present in Phase 4 (everyone)';
-    noteEl.textContent = 'Listen closely — earn +2 Challenge Bonus any phase by citing case data.';
+    noteEl.textContent = 'Listen closely  -  earn +2 Challenge Bonus any phase by citing case data.';
   }
 }
 
@@ -1187,7 +1202,7 @@ function pickRandom() {
     document.getElementById('pickerSub').textContent = 'Switch to the next phase tab.';
     document.getElementById('alreadyPicked').textContent = 'Presented: ' + pickedGroups[pickerPhase].map(function(g) {
       return (teamNames[g] && teamNames[g].trim()) ? teamNames[g] : ('Group ' + g);
-    }).join(' · ');
+    }).join('  |  ');
     return;
   }
   // All 9 groups in pool, no repeats within a phase
@@ -1223,40 +1238,7 @@ function pickRandom() {
         var prev = pickedGroups[pickerPhase].slice(0, -1).map(function(g) {
           return (teamNames[g] && teamNames[g].trim()) ? teamNames[g] : ('Group ' + g);
         });
-        document.getElementById('alreadyPicked').textContent = 'Already presented: ' + prev.join(' · ');
-      } else {
-        document.getElementById('alreadyPicked').textContent = '';
-      }
-      setSpotlight(chosen);
-      highlightScoreCard(chosen);
-    }
-  }, 70);
-}
-  var result = document.getElementById('pickerResult');
-  var sub = document.getElementById('pickerSub');
-  document.getElementById('pickBtn').disabled = true;
-  var spins = 0, maxSpins = 14;
-  var spinInterval = setInterval(function() {
-    result.textContent = getTeamLabel(available[Math.floor(Math.random() * available.length)]);
-    result.style.color = 'var(--muted)';
-    spins++;
-    if (spins >= maxSpins) {
-      clearInterval(spinInterval);
-      document.getElementById('pickBtn').disabled = false;
-      var chosen = available[Math.floor(Math.random() * available.length)];
-      pickedGroups[pickerPhase].push(chosen);
-      // Use team name if loaded, otherwise just group number — will look fine either way
-      var label = teamNames[chosen] ? teamNames[chosen] : ('Group ' + chosen);
-      result.textContent = 'Now presenting: ' + label;
-      result.style.color = 'var(--teal)';
-      var remaining = available.length - 1;
-      sub.textContent = remaining + ' group' + (remaining !== 1 ? 's' : '') + ' remaining this phase';
-      // Only show "already presented" once there are 2+ picks
-      if (pickedGroups[pickerPhase].length > 1) {
-        var prev = pickedGroups[pickerPhase].slice(0, -1).map(function(g) {
-          return teamNames[g] ? teamNames[g] : ('Group ' + g);
-        });
-        document.getElementById('alreadyPicked').textContent = 'Already presented: ' + prev.join(' · ');
+        document.getElementById('alreadyPicked').textContent = 'Already presented: ' + prev.join('  |  ');
       } else {
         document.getElementById('alreadyPicked').textContent = '';
       }
@@ -1310,7 +1292,7 @@ function awardChallenge(g) {
 // ── RESET (updated to also clear spotlight and teams) ──
 function resetAllData() {
   const confirmBtn = document.getElementById('resetConfirmBtn');
-  confirmBtn.textContent = 'Resetting…';
+  confirmBtn.textContent = 'Resetting...';
   confirmBtn.disabled = true;
   Promise.all([
     dbRef('scores').remove(),
@@ -1322,7 +1304,7 @@ function resetAllData() {
     document.getElementById('pickerResult').textContent = '';
     document.getElementById('pickerSub').textContent = '';
     document.getElementById('alreadyPicked').textContent = '';
-    showToast('Reset complete — reloading…');
+    showToast('Reset complete  -  reloading...');
     setTimeout(function() { window.location.reload(); }, 1200);
   }).catch(function(e) {
     showToast('Reset failed: ' + e.message);
